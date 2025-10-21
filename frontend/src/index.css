@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@layer components {
+  .btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    text-align: center;
+  }
+
+  .btnPrimary {
+    @apply bg-blue-500 text-white shadow-md;
+  }
+
+  .btnPrimary:hover {
+    @apply bg-blue-700;
+  }
+
+  .btnSecondary {
+    @apply bg-gray-200 text-gray-700 shadow-sm border border-gray-300;
+  }
+
+  .btnSecondary:hover {
+    @apply bg-gray-300;
+  }
+}
