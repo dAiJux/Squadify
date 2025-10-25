@@ -1,28 +1,52 @@
 @import "tailwindcss";
 
+@keyframes pulse-slow {
+  0%, 100% { transform: scale(1); opacity: 0.1; }
+  50% { transform: scale(1.1); opacity: 0.2; }
+}
+
+body {
+  @apply bg-slate-900 text-gray-200;
+}
+
 @layer components {
   .btn {
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease;
-    text-align: center;
+    @apply lg:text-base text-sm px-6 py-3 rounded-lg font-semibold cursor-pointer;
+    @apply transition-all duration-300 ease-in-out;
+    @apply text-center uppercase tracking-wider;
   }
 
   .btnPrimary {
-    @apply bg-blue-500 text-white shadow-md;
+    @apply bg-blue-500 text-white;
+    box-shadow: 0 0 5px theme(colors.blue.400),
+                0 0 10px theme(colors.blue.500),
+                0 0 15px theme(colors.blue.600);
   }
 
   .btnPrimary:hover {
-    @apply bg-blue-700;
+    @apply bg-blue-400;
+    box-shadow: 0 0 10px theme(colors.blue.300),
+                0 0 20px theme(colors.blue.400),
+                0 0 30px theme(colors.blue.500);
   }
 
   .btnSecondary {
-    @apply bg-gray-200 text-gray-700 shadow-sm border border-gray-300;
+    @apply bg-transparent text-violet-400 border border-violet-500;
+    box-shadow: 0 0 5px theme(colors.violet.500),
+                inset 0 0 5px theme(colors.violet.500);
   }
 
   .btnSecondary:hover {
-    @apply bg-gray-300;
+    @apply bg-violet-900/40 text-violet-300;
+    box-shadow: 0 0 10px theme(colors.violet.400),
+                inset 0 0 10px theme(colors.violet.400);
   }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 8s infinite ease-in-out;
+  }
+
+  .delay-200 { animation-delay: 2s; }
+  .delay-400 { animation-delay: 4s; }
+  .delay-600 { animation-delay: 6s; }
 }

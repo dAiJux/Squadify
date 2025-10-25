@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+.home-container {
+  @apply font-sans flex flex-col items-center justify-start min-h-screen w-full py-8 relative px-4 lg:px-16 overflow-x-hidden;
+}
+
+.home-card {
+  @apply flex flex-col gap-8 items-center text-center max-w-xl md:max-w-3xl w-full p-6 sm:p-10 lg:p-12 bg-slate-900/70 backdrop-blur-lg border border-blue-500/30 rounded-2xl shadow-2xl shadow-blue-500/10 relative z-10;
+}
+
+.logo-squadify {
+  @apply w-36 md:w-48 h-auto mb-8 relative z-10 lg:mt-6;
+  filter: drop-shadow(0 0 15px rgba(34, 211, 238, 0.8));
+}
+
+.home-card-text {
+  @apply text-sm sm:text-base md:text-lg text-gray-300 max-w-prose;
+}
+
+.home-card-actions {
+  @apply flex flex-col gap-6 w-full max-w-lg;
+}
+
+.home-card-action-group {
+  @apply flex flex-col items-center gap-5 w-full;
+}
+
+.home-card-action-text {
+  @apply text-sm lg:text-base text-gray-200 font-medium;
+}
+
+.home-card-button {
+  @apply lg:w-1/2 w-2/3 max-w-xs;
+}
+
+.separator {
+  @apply w-full h-px mt-2 self-center bg-gray-600/30 shadow-md shadow-gray-500/50;
+}
+
+.decor-pulse-blue {
+  @apply absolute top-1/4 left-1/4 w-32 h-32 md:w-48 md:h-48 lg:w-72 lg:h-72 bg-blue-500/10 rounded-full filter blur-3xl lg:top-1/4 lg:left-1/4;
+}
+
+.decor-pulse-violet {
+  @apply absolute bottom-1/4 right-1/4 w-40 h-40 md:w-60 md:h-60 lg:w-80 lg:h-80 bg-violet-500/10 rounded-full filter blur-3xl lg:bottom-1/4 lg:right-1/4;
+}
+
+.decor-left-joystick {
+  @apply hidden lg:block absolute top-1/2 -left-20 transform -translate-y-1/2 w-48 h-32 bg-teal-400/20 rounded-full rotate-45 filter blur-3xl opacity-70;
+}
+
+.decor-right-target-ring {
+  @apply absolute top-1/3 -right-8 transform -translate-y-1/2 w-24 h-24 md:w-32 md:h-32 border-4 border-pink-500/30 rounded-full filter blur-sm opacity-70 lg:-right-20;
+}
+
+.decor-right-target-dot {
+  @apply absolute top-1/3 -right-8 transform -translate-y-1/2 w-6 h-6 md:w-8 md:h-8 bg-pink-500/30 rounded-full lg:-right-20;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.2; transform: scale(1.1); }
+}

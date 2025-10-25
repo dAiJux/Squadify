@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import './home.css';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -13,19 +14,44 @@ const Home = () => {
   };
 
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <h1 className="text-4xl font-bold text-primaryBlue-500">Bienvenue sur Squadify</h1>
-        <p className="text-lg text-gray-700 max-w-prose">
-          Squadify : votre plateforme pour trouver des coéquipiers, former des groupes, et faire grandir vos projets ensemble.
+    <div className="home-container">
+      <div className="decor-pulse-blue animate-pulse-slow"></div>
+      <div className="decor-pulse-violet animate-pulse-slow delay-200"></div>
+      <div className="decor-left-joystick"></div>
+      <div className="decor-right-target-ring"></div>
+      <div className="decor-right-target-dot"></div>
+      <img
+        src="/icons/squadify.png"
+        alt="Logo Squadify"
+        className="logo-squadify"
+      />
+      <main className="home-card">
+        <p className="home-card-text">
+          Squadify est la plateforme dédiée aux joueurs cherchant à former l'équipe parfaite.
+          Ne laissez plus le hasard décider de vos coéquipiers. Parcourez des profils détaillés,
+          découvrez des joueurs compatibles avec votre style et vos ambitions, et connectez-vous
+          pour lancer votre prochaine partie.
         </p>
-        <div className="flex gap-4">
-          <button className="btn btnPrimary" onClick={handleLogin}>
-            Connexion
-          </button>
-          <button className="btn btnSecondary" onClick={handleRegister}>
-            Inscription
-          </button>
+        <div className="home-card-actions">
+          <div className="home-card-action-group">
+            <p className="home-card-action-text">Déjà un compte ?</p>
+            <button
+              className="btn btnPrimary home-card-button"
+              onClick={handleLogin}
+            >
+              Connexion
+            </button>
+          </div>
+          <div className="separator"></div>
+          <div className="home-card-action-group">
+            <p className="home-card-action-text">Nouveau sur Squadify ?</p>
+            <button
+              className="btn btnSecondary home-card-button"
+              onClick={handleRegister}
+            >
+              Inscription
+            </button>
+          </div>
         </div>
       </main>
     </div>
