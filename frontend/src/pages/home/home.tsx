@@ -1,16 +1,23 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import './home.css';
+import Auth from '../../components/auth/auth.tsx';
 
 const Home = () => {
-  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTab, setModalTab] = useState<'login' | 'register'>('login');
 
   const handleLogin = () => {
-    navigate('/auth/login');
+    setModalTab('login');
+    setIsModalOpen(true);
   };
 
   const handleRegister = () => {
-    navigate('/auth/register');
+    setModalTab('register');
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
   return (
@@ -54,6 +61,11 @@ const Home = () => {
           </div>
         </div>
       </main>
+      <Auth
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        initialTab={modalTab}
+      />
     </div>
   );
 };

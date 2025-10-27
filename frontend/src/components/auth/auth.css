@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+.modal-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out;
+}
+
+.modal-content {
+  @apply relative z-10 flex flex-col w-full max-w-md mx-4 bg-slate-900/80 backdrop-blur-xl border border-blue-500/30 rounded-2xl shadow-2xl shadow-blue-500/10 transition-all duration-300 ease-out;
+}
+
+.modal-header-flow {
+  @apply flex justify-between items-center border-b border-slate-700;
+}
+
+.modal-close-btn-flow {
+  @apply p-3 text-gray-500 hover:text-white transition-colors;
+}
+
+.modal-close-icon {
+  @apply w-6 h-6;
+}
+
+.modal-tabs {
+  @apply flex flex-1;
+}
+
+.modal-tab {
+  @apply flex-1 py-3 text-center font-medium rounded-t-lg cursor-pointer transition-colors;
+}
+
+.modal-tab-active {
+  @apply bg-slate-800 text-white;
+}
+
+.modal-tab-inactive {
+  @apply text-gray-400 hover:bg-slate-800/50;
+}
+
+.modal-form-container {
+  @apply p-8 sm:p-10;
+}
+
+.modal-form {
+  @apply flex flex-col gap-5;
+}
+
+.modal-title {
+  @apply text-xl font-bold text-white text-center mb-2;
+}
+
+.modal-label {
+  @apply block text-sm font-medium text-gray-300 mb-2;
+}
+
+.modal-input {
+  @apply w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors;
+}
+
+.modal-link {
+  @apply text-sm text-blue-400 hover:text-blue-300 text-right -mt-2;
+}
+
+.modal-btn {
+  @apply w-full py-3 px-4 rounded-lg text-white font-semibold transition-colors mt-3 bg-blue-600 hover:bg-blue-500;
+}
