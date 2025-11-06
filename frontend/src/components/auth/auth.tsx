@@ -5,18 +5,25 @@ interface AuthProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: 'login' | 'register';
+  onLoginSuccess: (token: string, userId: string, username: string) => void;
 }
 
-const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
+const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLoginSuccess }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
+
   const [registerUsername, setRegisterUsername] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [registerMessage, setRegisterMessage] = useState<string | null>(null);
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginMessage, setLoginMessage] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setActiveTab(initialTab);
+    setRegisterMessage(null);
+    setLoginMessage(null);
   }, [initialTab]);
 
   if (!isOpen) {
@@ -48,7 +55,7 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
       });
 
       if (response.status === 202) {
-        setRegisterMessage('Inscription réussie ! Veuillez vérifier votre email pour l\'activation.');
+        setRegisterMessage('Inscription réussie ! Un email de confirmation a été envoyé.');
         setRegisterUsername('');
         setRegisterEmail('');
         setRegisterPassword('');
@@ -67,6 +74,44 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
       }
     } catch (error) {
       setRegisterMessage('Connexion au serveur impossible. Vérifiez que le backend est lancé.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setLoginMessage(null);
+
+    const loginData = {
+      identifier: loginIdentifier,
+      password: loginPassword,
+    };
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('squadify_token', data.token);
+        localStorage.setItem('squadify_user_id', data.userId);
+        localStorage.setItem('squadify_username', data.username);
+        onLoginSuccess(data.token, data.userId, data.username);
+        onClose();
+      } else if (response.status === 401) {
+        setLoginMessage('Identifiant ou mot de passe incorrect.');
+      } else {
+        setLoginMessage('Une erreur inattendue est survenue. Veuillez réessayer.');
+      }
+    } catch (error) {
+      setLoginMessage('Connexion au serveur impossible. Vérifiez que le backend est lancé.');
     } finally {
       setIsSubmitting(false);
     }
@@ -104,15 +149,25 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
 
         <div className="modal-form-container">
           {activeTab === 'login' ? (
-            <form className="modal-form">
+            <form className="modal-form" onSubmit={handleLoginSubmit}>
               <h2 className="modal-title">Vos coéquipiers vous attendent !</h2>
+
+              {loginMessage && (
+                  <p className={`text-center font-medium text-red-400`}>
+                      {loginMessage}
+                  </p>
+              )}
+
               <div>
-                <label htmlFor="login-email" className="modal-label">Email</label>
+                <label htmlFor="login-identifier" className="modal-label">Email ou Nom d'utilisateur</label>
                 <input
-                  type="email"
-                  id="login-email"
-                  placeholder="votre.email@exemple.com"
+                  type="text" // Changé à text pour accepter email ou username
+                  id="login-identifier"
+                  placeholder="votre.email@exemple.com ou Pseudo"
                   className="modal-input"
+                  value={loginIdentifier}
+                  onChange={(e) => setLoginIdentifier(e.target.value)}
+                  required
                 />
               </div>
               <div>
@@ -122,13 +177,20 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
                   id="login-password"
                   placeholder="••••••••"
                   className="modal-input"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  required
                 />
               </div>
               <a href="#" className="modal-link">
                 Mot de passe oublié ?
               </a>
-              <button type="submit" className="modal-btn">
-                Se connecter
+              <button
+                type="submit"
+                className="modal-btn"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Connexion...' : 'Se connecter'}
               </button>
             </form>
           ) : (

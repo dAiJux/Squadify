@@ -19,6 +19,8 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - '2181:2181'
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
 
   kafka:
     image: 'confluentinc/cp-kafka:7.6.0'
@@ -36,6 +38,12 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_DIRS: /tmp/kafka-logs
+    volumes:
+      - kafka-logs:/tmp/kafka-logs
+    user: "0"
 
 volumes:
   mongo-data:
+  zookeeper-data:
+  kafka-logs:

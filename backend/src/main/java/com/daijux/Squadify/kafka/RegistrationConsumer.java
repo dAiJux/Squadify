@@ -32,7 +32,7 @@ public class RegistrationConsumer {
         newUser.setUsername(event.getUsername());
         newUser.setEmail(event.getEmail());
         newUser.setPassword(hashedPassword);
-        newUser.setEnabled(false);
+        newUser.setAccountEnabled(true);
 
         Mono.defer(() -> userRepository.save(newUser))
                 .doOnError(MongoWriteException.class, e -> {

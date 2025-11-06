@@ -19,8 +19,6 @@ public class RegistrationProducer {
     }
 
     public Mono<Void> sendRegistrationEvent(UserRegistrationEvent event) {
-        return Mono.fromRunnable(() -> {
-            kafkaTemplate.send(registrationTopic, event.getEmail(), event);
-        }).then();
+        return Mono.fromRunnable(() -> kafkaTemplate.send(registrationTopic, event.getEmail(), event)).then();
     }
 }

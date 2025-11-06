@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import Home from './pages/home/home.tsx';
+import Dashboard from './pages/dashboard/dashboard.tsx'
 
 const rootElement = document.getElementById('app');
 
@@ -12,6 +13,7 @@ if (rootElement) {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </BrowserRouter>
     </React.StrictMode>
