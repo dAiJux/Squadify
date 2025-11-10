@@ -10,7 +10,6 @@ interface AuthProps {
 
 const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLoginSuccess }) => {
   const [activeTab, setActiveTab] = useState(initialTab);
-
   const [registerUsername, setRegisterUsername] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
@@ -34,6 +33,44 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
     e.stopPropagation();
   };
 
+  const attemptLogin = async (identifier: string, password: string) => {
+    setLoginMessage(null);
+
+    const loginData = {
+      identifier: identifier,
+      password: password,
+    };
+
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(loginData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('squadify_token', data.token);
+        localStorage.setItem('squadify_user_id', data.userId);
+        localStorage.setItem('squadify_username', data.username);
+        onLoginSuccess(data.token, data.userId, data.username);
+        onClose();
+        return { success: true };
+      } else if (response.status === 401) {
+        setLoginMessage('Identifiant ou mot de passe incorrect.');
+        return { success: false, message: 'Identifiant ou mot de passe incorrect.' };
+      } else {
+        setLoginMessage('Une erreur inattendue est survenue lors de la connexion. Veuillez réessayer.');
+        return { success: false, message: 'Erreur inattendue.' };
+      }
+    } catch (error) {
+      setLoginMessage('Connexion au serveur impossible. Vérifiez que le backend est lancé.');
+      return { success: false, message: 'Erreur de connexion serveur.' };
+    }
+  };
+
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -45,6 +82,9 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
       password: registerPassword,
     };
 
+    const tempPassword = registerPassword;
+    const tempIdentifier = registerUsername;
+
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
@@ -55,11 +95,15 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
       });
 
       if (response.status === 202) {
-        setRegisterMessage('Inscription réussie ! Un email de confirmation a été envoyé.');
-        setRegisterUsername('');
-        setRegisterEmail('');
-        setRegisterPassword('');
-        setActiveTab('login');
+        setRegisterMessage('Inscription réussie. Connexion en cours...');
+
+        const loginResult = await attemptLogin(tempIdentifier, tempPassword);
+
+        if (!loginResult.success) {
+            setRegisterMessage('Inscription réussie, mais échec de la connexion automatique. Veuillez vous connecter manuellement.');
+            setActiveTab('login');
+        }
+
       } else if (response.status === 409) {
         const errorData = await response.json();
         if (errorData.error === 'email_exists') {
@@ -82,39 +126,10 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setLoginMessage(null);
 
-    const loginData = {
-      identifier: loginIdentifier,
-      password: loginPassword,
-    };
+    await attemptLogin(loginIdentifier, loginPassword);
 
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('squadify_token', data.token);
-        localStorage.setItem('squadify_user_id', data.userId);
-        localStorage.setItem('squadify_username', data.username);
-        onLoginSuccess(data.token, data.userId, data.username);
-        onClose();
-      } else if (response.status === 401) {
-        setLoginMessage('Identifiant ou mot de passe incorrect.');
-      } else {
-        setLoginMessage('Une erreur inattendue est survenue. Veuillez réessayer.');
-      }
-    } catch (error) {
-      setLoginMessage('Connexion au serveur impossible. Vérifiez que le backend est lancé.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    setIsSubmitting(false);
   };
 
   return (
@@ -161,7 +176,7 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
               <div>
                 <label htmlFor="login-identifier" className="modal-label">Email ou Nom d'utilisateur</label>
                 <input
-                  type="text" // Changé à text pour accepter email ou username
+                  type="text"
                   id="login-identifier"
                   placeholder="votre.email@exemple.com ou Pseudo"
                   className="modal-input"
