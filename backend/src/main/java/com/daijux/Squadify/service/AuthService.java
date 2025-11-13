@@ -84,6 +84,7 @@ public class AuthService {
                             .token(token)
                             .userId(user.getId())
                             .username(user.getUsername())
+                            .email(user.getEmail())
                             .build());
                 })
                 .onErrorResume(e -> Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiants invalides")));

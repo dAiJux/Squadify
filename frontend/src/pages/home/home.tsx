@@ -1,36 +1,45 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store/store';
+import { setUserData, clearUserData } from '../../store/user';
 import './home.css';
 import Auth from '../../components/auth/auth.tsx';
 
-interface UserData {
-  userId: string;
-  username: string;
-}
-
 const Home = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [currentUser, setCurrentUser] = useState<UserData | null>(null);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTab, setModalTab] = useState<'login' | 'register'>('login');
-  const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('squadify_token');
-    const userId = localStorage.getItem('squadify_user_id');
-    const username = localStorage.getItem('squadify_username');
-
-    if (token && userId && username) {
-      setIsAuthenticated(true);
-      setCurrentUser({ userId, username });
+    if (isAuthenticated) {
       navigate('/dashboard');
+      return;
+    }
+
+    const token = localStorage.getItem('squadify_token');
+    const userDataStr = localStorage.getItem('squadify_user_data');
+
+    if (token && userDataStr) {
+      try {
+        const userData = JSON.parse(userDataStr);
+        dispatch(setUserData({ token, ...userData }));
+        navigate('/dashboard');
+      } catch (e) {
+        localStorage.removeItem('squadify_token');
+        localStorage.removeItem('squadify_user_data');
+        dispatch(clearUserData());
+        setIsLoading(false);
+      }
     } else {
-      setIsAuthenticated(false);
-      setCurrentUser(null);
       setIsLoading(false);
     }
-  }, [navigate]);
+  }, [isAuthenticated, navigate, dispatch]);
 
 
   const handleLogin = () => {
@@ -45,22 +54,6 @@ const Home = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-  };
-
-  const handleLoginSuccess = (token: string, userId: string, username: string) => {
-    setIsAuthenticated(true);
-    setCurrentUser({ userId, username });
-    setIsModalOpen(false);
-    navigate('/dashboard');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('squadify_token');
-    localStorage.removeItem('squadify_user_id');
-    localStorage.removeItem('squadify_username');
-    setIsAuthenticated(false);
-    setCurrentUser(null);
-    navigate('/');
   };
 
   if (isLoading) {
@@ -116,7 +109,6 @@ const Home = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         initialTab={modalTab}
-        onLoginSuccess={handleLoginSuccess}
       />
     </div>
   );

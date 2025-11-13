@@ -1,22 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import { setUserData } from '../../store/user';
 import './auth.css';
 
 interface AuthProps {
   isOpen: boolean;
   onClose: () => void;
   initialTab?: 'login' | 'register';
-  onLoginSuccess: (token: string, userId: string, username: string) => void;
 }
 
-const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLoginSuccess }) => {
+const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
+  const dispatch = useDispatch();
   const [activeTab, setActiveTab] = useState(initialTab);
+
   const [registerUsername, setRegisterUsername] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerMessage, setRegisterMessage] = useState<string | null>(null);
+
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginMessage, setLoginMessage] = useState<string | null>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -52,10 +57,23 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
 
       if (response.ok) {
         const data = await response.json();
+
+        const userData = {
+            token: data.token,
+            userId: data.userId,
+            username: data.username,
+            email: data.email
+        };
+
         localStorage.setItem('squadify_token', data.token);
-        localStorage.setItem('squadify_user_id', data.userId);
-        localStorage.setItem('squadify_username', data.username);
-        onLoginSuccess(data.token, data.userId, data.username);
+        localStorage.setItem('squadify_user_data', JSON.stringify({
+            userId: data.userId,
+            username: data.username,
+            email: data.email
+        }));
+
+        dispatch(setUserData(userData));
+
         onClose();
         return { success: true };
       } else if (response.status === 401) {
@@ -135,7 +153,6 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={handleModalContentClick}>
-
         <div className="modal-header-flow">
           <div className="modal-tabs">
             <button
@@ -161,18 +178,15 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
             </svg>
           </button>
         </div>
-
         <div className="modal-form-container">
           {activeTab === 'login' ? (
             <form className="modal-form" onSubmit={handleLoginSubmit}>
               <h2 className="modal-title">Vos coéquipiers vous attendent !</h2>
-
               {loginMessage && (
                   <p className={`text-center font-medium text-red-400`}>
                       {loginMessage}
                   </p>
               )}
-
               <div>
                 <label htmlFor="login-identifier" className="modal-label">Email ou Nom d'utilisateur</label>
                 <input
@@ -211,13 +225,11 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login', onLo
           ) : (
             <form className="modal-form" onSubmit={handleRegisterSubmit}>
               <h2 className="modal-title">Envie de rejoindre une équipe ?</h2>
-
               {registerMessage && (
                   <p className={`text-center font-medium ${registerMessage.includes('réussie') ? 'text-green-400' : 'text-red-400'}`}>
                       {registerMessage}
                   </p>
               )}
-
               <div>
                 <label htmlFor="register-username" className="modal-label">Nom d'utilisateur</label>
                 <input

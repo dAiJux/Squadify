@@ -1,40 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store/store';
+import { clearUserData } from '../../store/user';
 import './dashboard.css';
 
-interface UserData {
-  token: string | null;
-  userId: string | null;
-  username: string | null;
-}
-
 const Dashboard: React.FC = () => {
-  const [userData, setUserData] = useState<UserData>({ token: null, userId: null, username: null });
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+  const userData = useSelector((state: RootState) => state.user.data);
+  const token = useSelector((state: RootState) => state.user.token);
 
   useEffect(() => {
-    const token = localStorage.getItem('squadify_token');
-    const userId = localStorage.getItem('squadify_user_id');
-    const username = localStorage.getItem('squadify_username');
-
-    if (token && userId && username) {
-      setUserData({ token, userId, username });
-    } else {
+    if (!isAuthenticated) {
       navigate('/');
     }
-    setLoading(false);
-  }, [navigate]);
+  }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
+    dispatch(clearUserData());
     localStorage.removeItem('squadify_token');
-    localStorage.removeItem('squadify_user_id');
-    localStorage.removeItem('squadify_username');
+    localStorage.removeItem('squadify_user_data');
     navigate('/');
   };
 
-  if (loading) {
-    return <div className="dashboard-loading">Chargement du profil...</div>;
+  if (!isAuthenticated || !userData) {
+    return <div className="dashboard-loading">Chargement...</div>;
   }
 
   return (
@@ -53,6 +46,7 @@ const Dashboard: React.FC = () => {
         <h2 className="dashboard-section-title">Vos Informations de Session</h2>
         <div className="info-card">
           <p><strong>Nom d'utilisateur:</strong> <span>{userData.username}</span></p>
+          <p><strong>Email:</strong> <span>{userData.email}</span></p>
           <p><strong>ID Utilisateur (MongoDB):</strong> <span>{userData.userId}</span></p>
         </div>
 
@@ -61,7 +55,7 @@ const Dashboard: React.FC = () => {
             <p className="token-label">Le token est stocké pour les futures requêtes API.</p>
             <textarea
               readOnly
-              value={userData.token || ''}
+              value={token || ''}
               className="token-area"
               rows={5}
             />
