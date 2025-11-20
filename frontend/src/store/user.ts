@@ -4,6 +4,7 @@ interface UserData {
   userId: string;
   username: string;
   email: string;
+  setupCompleted: boolean;
 }
 
 interface UserState {
@@ -29,6 +30,7 @@ export const userSlice = createSlice({
         userId: action.payload.userId,
         username: action.payload.username,
         email: action.payload.email,
+        setupCompleted: action.payload.setupCompleted,
       };
     },
     clearUserData: (state) => {
@@ -36,8 +38,13 @@ export const userSlice = createSlice({
       state.token = null;
       state.data = null;
     },
+    completeSetup: (state) => {
+      if (state.data) {
+        state.data.setupCompleted = true;
+      }
+    }
   },
 });
 
-export const { setUserData, clearUserData } = userSlice.actions;
+export const { setUserData, clearUserData, completeSetup } = userSlice.actions;
 export default userSlice.reducer;

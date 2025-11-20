@@ -1,6 +1,6 @@
 package com.daijux.Squadify.kafka;
 
-import com.daijux.Squadify.event.UserRegistrationEvent;
+import com.daijux.Squadify.event.UserRegistration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -12,13 +12,13 @@ public class RegistrationProducer {
     @Value("${kafka.topic.registration}")
     private String registrationTopic;
 
-    private final KafkaTemplate<String, UserRegistrationEvent> kafkaTemplate;
+    private final KafkaTemplate<String, UserRegistration> kafkaTemplate;
 
-    public RegistrationProducer(KafkaTemplate<String, UserRegistrationEvent> kafkaTemplate) {
+    public RegistrationProducer(KafkaTemplate<String, UserRegistration> kafkaTemplate) {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public Mono<Void> sendRegistrationEvent(UserRegistrationEvent event) {
+    public Mono<Void> sendRegistrationEvent(UserRegistration event) {
         return Mono.fromRunnable(() -> kafkaTemplate.send(registrationTopic, event.getEmail(), event)).then();
     }
 }

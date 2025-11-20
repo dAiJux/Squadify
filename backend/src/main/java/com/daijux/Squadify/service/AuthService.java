@@ -3,15 +3,17 @@ package com.daijux.Squadify.service;
 import com.daijux.Squadify.dto.AuthResponse;
 import com.daijux.Squadify.dto.LoginRequest;
 import com.daijux.Squadify.dto.RegistrationRequest;
-import com.daijux.Squadify.event.UserRegistrationEvent;
+import com.daijux.Squadify.event.UserRegistration;
 import com.daijux.Squadify.kafka.RegistrationProducer;
-import com.daijux.Squadify.model.User;
-import com.daijux.Squadify.repository.UserRepository;
+import com.daijux.Squadify.repository.User;
 import com.daijux.Squadify.security.JwtTokenProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
@@ -22,24 +24,28 @@ import java.util.Map;
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    private final User user;
     private final RegistrationProducer registrationProducer;
     private final ReactiveAuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
-    public AuthService(UserRepository userRepository,
+    public AuthService(User user,
                        RegistrationProducer registrationProducer,
                        ReactiveAuthenticationManager authenticationManager,
-                       JwtTokenProvider jwtTokenProvider) {
-        this.userRepository = userRepository;
+                       JwtTokenProvider jwtTokenProvider,
+                       PasswordEncoder passwordEncoder) {
+        this.user = user;
         this.registrationProducer = registrationProducer;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Mono<Map<String, String>> register(RegistrationRequest request) {
-        Mono<Boolean> emailExists = userRepository.findByEmail(request.getEmail()).hasElement();
-        Mono<Boolean> usernameExists = userRepository.findByUsername(request.getUsername()).hasElement();
+        Mono<Boolean> emailExists = user.findByEmail(request.getEmail()).hasElement();
+        Mono<Boolean> usernameExists = user.findByUsername(request.getUsername()).hasElement();
 
         return Mono.zip(emailExists, usernameExists)
                 .flatMap(tuple -> {
@@ -58,14 +64,25 @@ public class AuthService {
                         return Mono.just(errorDetails);
                     }
 
-                    UserRegistrationEvent event = UserRegistrationEvent.builder()
-                            .username(request.getUsername())
-                            .email(request.getEmail())
-                            .rawPassword(request.getPassword())
-                            .build();
+                    com.daijux.Squadify.model.User newUser = new com.daijux.Squadify.model.User();
+                    newUser.setUsername(request.getUsername());
+                    newUser.setEmail(request.getEmail());
+                    newUser.setPassword(passwordEncoder.encode(request.getPassword()));
 
-                    return registrationProducer.sendRegistrationEvent(event)
-                            .thenReturn(Map.of("message", "Inscription en cours de traitement."));
+                    return user.save(newUser)
+                            .flatMap(savedUser -> {
+                                UserRegistration event = UserRegistration.builder()
+                                        .username(savedUser.getUsername())
+                                        .email(savedUser.getEmail())
+                                        .build();
+
+                                return registrationProducer.sendRegistrationEvent(event)
+                                        .thenReturn(Map.of("message", "Inscription réussie."));
+                            })
+                            .onErrorResume(e -> {
+                                log.error("Erreur lors de la sauvegarde synchrone de l'utilisateur {}: {}", request.getEmail(), e.getMessage());
+                                return Mono.just(Map.of("error", "save_failed", "message", "Erreur serveur lors de l'enregistrement du compte."));
+                            });
                 });
     }
 
@@ -77,7 +94,7 @@ public class AuthService {
 
         return authenticationManager.authenticate(auth)
                 .flatMap(authenticatedAuth -> {
-                    User user = (User) authenticatedAuth.getPrincipal();
+                    com.daijux.Squadify.model.User user = (com.daijux.Squadify.model.User) authenticatedAuth.getPrincipal();
                     String token = jwtTokenProvider.generateToken(user);
 
                     return Mono.just(AuthResponse.builder()
@@ -85,6 +102,7 @@ public class AuthService {
                             .userId(user.getId())
                             .username(user.getUsername())
                             .email(user.getEmail())
+                            .setupCompleted(user.isSetupCompleted())
                             .build());
                 })
                 .onErrorResume(e -> Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiants invalides")));

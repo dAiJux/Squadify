@@ -11,6 +11,7 @@ const Home = () => {
   const dispatch = useDispatch();
 
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+  const setupCompleted = useSelector((state: RootState) => state.user.data?.setupCompleted);
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,7 +19,11 @@ const Home = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/dashboard');
+      if (setupCompleted) {
+        navigate('/dashboard');
+      } else {
+        navigate('/setup');
+      }
       return;
     }
 
@@ -29,7 +34,12 @@ const Home = () => {
       try {
         const userData = JSON.parse(userDataStr);
         dispatch(setUserData({ token, ...userData }));
-        navigate('/dashboard');
+
+        if (userData.setupCompleted) {
+            navigate('/dashboard');
+        } else {
+            navigate('/setup');
+        }
       } catch (e) {
         localStorage.removeItem('squadify_token');
         localStorage.removeItem('squadify_user_data');
@@ -39,8 +49,7 @@ const Home = () => {
     } else {
       setIsLoading(false);
     }
-  }, [isAuthenticated, navigate, dispatch]);
-
+  }, [isAuthenticated, setupCompleted, navigate, dispatch]);
 
   const handleLogin = () => {
     setModalTab('login');

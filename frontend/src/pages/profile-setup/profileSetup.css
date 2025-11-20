@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+.setup-container {
+    @apply min-h-screen flex flex-col items-center justify-center bg-slate-900 p-8 font-sans;
+}
+
+.setup-card {
+    @apply bg-slate-900/70 backdrop-blur-lg p-10 rounded-2xl
+           shadow-2xl shadow-blue-500/10 w-full max-w-4xl
+           border border-blue-500/30;
+}
+
+.setup-title {
+    @apply text-4xl text-blue-400 text-center mb-2 font-bold tracking-tight;
+    text-shadow: 0 0 8px theme(colors.blue.400);
+}
+
+.setup-subtitle {
+    @apply text-gray-400 text-center mb-12 text-lg;
+}
+
+.setup-section {
+    @apply mb-10;
+}
+
+.section-title {
+    @apply text-violet-400 text-lg mb-4 uppercase tracking-widest font-bold border-l-4 border-violet-500 pl-3;
+}
+
+.options-grid {
+    @apply flex flex-wrap gap-4;
+}
+
+.option-card {
+    @apply bg-slate-800/60 text-gray-300 py-3 px-6 rounded-lg cursor-pointer
+           transition-all duration-200 border border-gray-700 select-none font-medium;
+}
+
+.option-card:hover {
+    @apply bg-slate-700 border-blue-500/50 -translate-y-0.5;
+}
+
+.option-card.selected {
+    @apply bg-blue-900/40 text-blue-200 border-blue-400
+           shadow-lg shadow-blue-600/40 translate-y-0
+           font-semibold;
+    box-shadow: 0 0 10px theme(colors.blue.500), inset 0 0 5px theme(colors.blue.300);
+}
+
+.setup-footer {
+    @apply mt-16 flex justify-center;
+}
+
+.finish-btn {
+    @apply bg-gradient-to-r from-violet-600 to-pink-600 text-white
+           py-4 px-16 rounded-full font-bold text-xl cursor-pointer
+           border-none transition-all duration-300
+           shadow-lg shadow-violet-900/50;
+}
+
+.finish-btn:hover {
+    @apply scale-105 shadow-xl shadow-violet-600/60 brightness-110;
+}

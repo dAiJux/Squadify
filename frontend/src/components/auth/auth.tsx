@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUserData } from '../../store/user';
+import { useNavigate } from 'react-router-dom';
 import './auth.css';
 
 interface AuthProps {
@@ -11,6 +12,7 @@ interface AuthProps {
 
 const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const [registerUsername, setRegisterUsername] = useState('');
@@ -57,24 +59,26 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
 
       if (response.ok) {
         const data = await response.json();
-
         const userData = {
             token: data.token,
             userId: data.userId,
             username: data.username,
-            email: data.email
+            email: data.email,
+            setupCompleted: data.setupCompleted
         };
 
         localStorage.setItem('squadify_token', data.token);
-        localStorage.setItem('squadify_user_data', JSON.stringify({
-            userId: data.userId,
-            username: data.username,
-            email: data.email
-        }));
+        localStorage.setItem('squadify_user_data', JSON.stringify(userData));
 
         dispatch(setUserData(userData));
 
         onClose();
+
+        if (data.setupCompleted) {
+            navigate('/dashboard');
+        } else {
+            navigate('/setup');
+        }
         return { success: true };
       } else if (response.status === 401) {
         setLoginMessage('Identifiant ou mot de passe incorrect.');
@@ -84,69 +88,62 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
         return { success: false, message: 'Erreur inattendue.' };
       }
     } catch (error) {
-      setLoginMessage('Connexion au serveur impossible. Vérifiez que le backend est lancé.');
       return { success: false, message: 'Erreur de connexion serveur.' };
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setRegisterMessage(null);
+      e.preventDefault();
+      setIsSubmitting(true);
+      setRegisterMessage(null);
 
-    const registrationData = {
-      username: registerUsername,
-      email: registerEmail,
-      password: registerPassword,
-    };
+      const registrationData = {
+        username: registerUsername,
+        email: registerEmail,
+        password: registerPassword,
+      };
 
-    const tempPassword = registerPassword;
-    const tempIdentifier = registerUsername;
+      const tempPassword = registerPassword;
+      const tempIdentifier = registerUsername;
 
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registrationData),
-      });
+      try {
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(registrationData),
+        });
 
-      if (response.status === 202) {
-        setRegisterMessage('Inscription réussie. Connexion en cours...');
+        if (response.ok || response.status === 202) {
+          setRegisterMessage('Inscription réussie. Connexion en cours...');
 
-        const loginResult = await attemptLogin(tempIdentifier, tempPassword);
-
-        if (!loginResult.success) {
-            setRegisterMessage('Inscription réussie, mais échec de la connexion automatique. Veuillez vous connecter manuellement.');
-            setActiveTab('login');
-        }
-
-      } else if (response.status === 409) {
-        const errorData = await response.json();
-        if (errorData.error === 'email_exists') {
-            setRegisterMessage('Erreur: Cet email est déjà associé à un compte.');
-        } else if (errorData.error === 'username_exists') {
-            setRegisterMessage('Erreur: Ce nom d\'utilisateur est déjà pris.');
+          const loginResult = await attemptLogin(tempIdentifier, tempPassword);
+          if (!loginResult.success) {
+              setRegisterMessage('Inscription réussie, mais échec de la connexion automatique. Veuillez vous connecter manuellement.');
+              setActiveTab('login');
+          }
+        } else if (response.status === 409) {
+          const errorData = await response.json();
+          if (errorData.error === 'username_exists') {
+              setRegisterMessage('Erreur: Ce nom d\'utilisateur est déjà pris.');
+          } else {
+              setRegisterMessage('Une erreur de conflit est survenue.');
+          }
         } else {
-            setRegisterMessage('Une erreur de conflit est survenue.');
+          setRegisterMessage('Une erreur inattendue est survenue. Veuillez réessayer.');
         }
-      } else {
-        setRegisterMessage('Une erreur inattendue est survenue. Veuillez réessayer.');
+      } catch (error) {
+        setRegisterMessage('Erreur de connexion serveur.');
+      } finally {
+        setIsSubmitting(false);
       }
-    } catch (error) {
-      setRegisterMessage('Connexion au serveur impossible. Vérifiez que le backend est lancé.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-
     await attemptLogin(loginIdentifier, loginPassword);
-
     setIsSubmitting(false);
   };
 
@@ -211,9 +208,6 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
                   required
                 />
               </div>
-              <a href="#" className="modal-link">
-                Mot de passe oublié ?
-              </a>
               <button
                 type="submit"
                 className="modal-btn"

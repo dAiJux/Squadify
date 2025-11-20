@@ -30,7 +30,7 @@ public class User implements UserDetails {
 
     private List<String> roles = Collections.singletonList("ROLE_USER");
 
-    private boolean accountEnabled = true;
+    private boolean setupCompleted = false;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -61,6 +61,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return this.accountEnabled;
+        return true;
     }
 }

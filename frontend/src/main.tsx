@@ -5,7 +5,9 @@ import { Provider } from 'react-redux';
 import { store } from './store/store.ts';
 import './index.css';
 import Home from './pages/home/home.tsx';
+import ProfileSetup from './pages/profile-setup/profileSetup.tsx';
 import Dashboard from './pages/dashboard/dashboard.tsx';
+import AuthGuard from './guards/authGuard.tsx';
 
 const rootElement = document.getElementById('app');
 
@@ -16,7 +18,22 @@ if (rootElement) {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route
+              path="/setup"
+              element={
+                <AuthGuard requireSetup={false}>
+                  <ProfileSetup />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <AuthGuard requireSetup={true}>
+                  <Dashboard />
+                </AuthGuard>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </Provider>

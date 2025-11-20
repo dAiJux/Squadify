@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRegistrationEvent {
+public class UserRegistration {
     private String username;
     private String email;
-    private String rawPassword;
 }
