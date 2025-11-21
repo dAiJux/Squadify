@@ -3,9 +3,11 @@ services:
     image: 'mongo:latest'
     container_name: mongodb
     environment:
-      - 'MONGO_INITDB_DATABASE=squadify-db'
-      - 'MONGO_INITDB_ROOT_PASSWORD=secretpassword'
-      - 'MONGO_INITDB_ROOT_USERNAME=squadify-admin'
+      - 'MONGO_INITDB_DATABASE=${MONGO_DB_NAME}'
+      - 'MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}'
+      - 'MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}'
+    env_file:
+      - .env
     ports:
       - '27017:27017'
     volumes:
@@ -52,6 +54,23 @@ services:
     command: >
       sh -c "chown -R 1000:1000 /var/lib/kafka || true &&
              /etc/confluent/docker/run"
+
+  squadify-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: squadify-app
+    depends_on:
+      - mongodb
+      - kafka
+    ports:
+      - '8080:8080'
+    env_file:
+      - .env
+    environment:
+      MONGO_HOST: mongodb
+      KAFKA_BROKERS: kafka:9092
+    restart: on-failure
 
 volumes:
   mongo-data:
