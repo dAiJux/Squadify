@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
 import { completeSetup } from '../../store/user';
+import { setProfileData } from '../../store/profile';
 import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '../../data/gameOptions';
 import './profileSetup.css';
 
@@ -51,6 +52,7 @@ const ProfileSetup: React.FC = () => {
 
       if (response.ok) {
         dispatch(completeSetup());
+        dispatch(setProfileData(profileData));
 
         const storedDataStr = localStorage.getItem('squadify_user_data');
         if (storedDataStr) {

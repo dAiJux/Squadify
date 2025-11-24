@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUserData } from '../../store/user';
+import { setProfileData } from '../../store/profile';
 import { useNavigate } from 'react-router-dom';
 import './auth.css';
 
@@ -75,6 +76,17 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
         onClose();
 
         if (data.setupCompleted) {
+            try {
+                const profileRes = await fetch(`/api/profiles/${data.userId}`, {
+                    headers: { 'Authorization': `Bearer ${data.token}` }
+                });
+                if (profileRes.ok) {
+                    const profileData = await profileRes.json();
+                    dispatch(setProfileData(profileData));
+                }
+            } catch (err) {
+                console.error("Impossible de charger le profil", err);
+            }
             navigate('/dashboard');
         } else {
             navigate('/setup');
@@ -118,7 +130,7 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
         if (response.ok || response.status === 202) {
           setRegisterMessage('Inscription réussie. Connexion en cours...');
 
-          const loginResult = await attemptLogin(tempIdentifier, tempPassword);
+          const loginResult = await attemptLogin(registerUsername, registerPassword);
           if (!loginResult.success) {
               setRegisterMessage('Inscription réussie, mais échec de la connexion automatique. Veuillez vous connecter manuellement.');
               setActiveTab('login');
