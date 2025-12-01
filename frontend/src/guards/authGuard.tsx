@@ -28,7 +28,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children, requireSetup = true }) 
     }
 
     if (location.pathname === '/setup' && setupCompleted) {
-        navigate('/dashboard');
+        navigate('/matchmaking');
     }
 
   }, [isAuthenticated, setupCompleted, requireSetup, navigate, location]);

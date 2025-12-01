@@ -6,7 +6,7 @@ import { store } from './store/store.ts';
 import './index.css';
 import Home from './pages/home/home.tsx';
 import ProfileSetup from './pages/profile-setup/profileSetup.tsx';
-import Dashboard from './pages/dashboard/dashboard.tsx';
+import Matchmaking from './pages/matchmaking/matchmaking.tsx';
 import AuthGuard from './guards/authGuard.tsx';
 
 const rootElement = document.getElementById('app');
@@ -27,10 +27,10 @@ if (rootElement) {
               }
             />
             <Route
-              path="/dashboard"
+              path="/matchmaking"
               element={
                 <AuthGuard requireSetup={true}>
-                  <Dashboard />
+                  <Matchmaking />
                 </AuthGuard>
               }
             />

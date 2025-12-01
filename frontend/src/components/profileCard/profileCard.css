@@ -1,0 +1,106 @@
+@import "tailwindcss";
+
+.profile-card-root {
+  @apply w-full max-w-xl sm:max-w-2xl bg-slate-900/70 backdrop-blur-lg rounded-2xl border border-blue-500/20 shadow-2xl p-6 relative cursor-pointer transition-all duration-300 ease-in-out flex items-start justify-center overflow-hidden;
+  min-height: 21.25rem;
+  max-height: 32.5rem;
+}
+
+.profile-card-root.expanded {
+  @apply overflow-auto p-5;
+  max-height: calc(100vh - 10rem);
+}
+
+.profile-card-inner {
+  @apply w-full flex flex-col;
+}
+
+.card-header {
+  @apply flex flex-col items-center gap-3;
+}
+
+.username {
+  @apply text-2xl sm:text-3xl font-extrabold text-blue-400 mb-1;
+}
+
+.avatar {
+  @apply w-24 h-24 sm:w-40 sm:h-40 bg-slate-800 rounded-full flex items-center justify-center text-gray-400 border-4 border-violet-500/40 shadow-lg;
+}
+
+.card-section {
+  @apply mt-5 w-full;
+}
+
+.section-title {
+  @apply text-base sm:text-lg font-semibold text-teal-300 flex items-center gap-2 mb-2;
+}
+
+.chips {
+  @apply flex flex-wrap gap-2;
+}
+
+.chip {
+  @apply px-3 py-1 rounded-full bg-violet-600/20 text-violet-200 text-sm border border-violet-500/30;
+}
+
+.card-divider {
+  @apply w-full transition-all duration-300 ease-in-out;
+  height: 1px;
+  background-color: rgb(51 65 85 / 0.3);
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+}
+
+.profile-card-root.expanded .card-divider {
+  @apply opacity-100 my-4;
+  max-height: 1px;
+}
+
+.card-details {
+  @apply w-full flex flex-col gap-4 m-0 p-0 opacity-0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .28s ease, opacity .2s ease;
+  scrollbar-gutter: stable;
+}
+
+.card-details.enable-scroll {
+  overflow: auto;
+}
+
+.profile-card-root.expanded .card-details {
+  @apply opacity-100 pt-2.5;
+  max-height: 60vh;
+}
+
+.detail-title {
+  @apply text-sm font-semibold text-violet-300 flex items-center gap-2 mb-1;
+}
+
+.detail-list {
+  @apply list-disc list-inside ml-4 text-gray-300 text-sm space-y-1;
+}
+
+.detail-text {
+  @apply text-gray-300 text-sm;
+}
+
+@media (max-width: 40rem) {
+  .profile-card-root {
+    min-height: 18.75rem;
+    max-height: 32.5rem;
+  }
+  .profile-card-root.expanded {
+    max-height: calc(100vh - 7.5rem);
+  }
+  .profile-card-root.expanded .card-details {
+    max-height: 55vh;
+  }
+  .avatar {
+    @apply w-20 h-20;
+  }
+  .username {
+    @apply text-2xl;
+  }
+}

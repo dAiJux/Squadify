@@ -39,6 +39,7 @@ public class WebSecurity {
                         .pathMatchers(HttpMethod.GET, "/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/profiles/setup/**").authenticated()
                         .pathMatchers(HttpMethod.GET, "/api/profiles/**").authenticated()
+                        .pathMatchers("/api/matchmaking/**").authenticated()
                         .anyExchange().authenticated()
                 )
                 .securityContextRepository(jwtSecurityContextRepository)

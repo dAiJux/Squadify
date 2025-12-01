@@ -61,7 +61,7 @@ const ProfileSetup: React.FC = () => {
             localStorage.setItem('squadify_user_data', JSON.stringify(storedData));
         }
 
-        navigate('/dashboard');
+        navigate('/matchmaking');
       } else {
         console.error("Erreur lors de la sauvegarde du profil");
       }

@@ -87,7 +87,7 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
             } catch (err) {
                 console.error("Impossible de charger le profil", err);
             }
-            navigate('/dashboard');
+            navigate('/matchmaking');
         } else {
             navigate('/setup');
         }

@@ -20,7 +20,7 @@ const Home = () => {
   useEffect(() => {
     if (isAuthenticated) {
       if (setupCompleted) {
-        navigate('/dashboard');
+        navigate('/matchmaking');
       } else {
         navigate('/setup');
       }
@@ -36,7 +36,7 @@ const Home = () => {
         dispatch(setUserData({ token, ...userData }));
 
         if (userData.setupCompleted) {
-            navigate('/dashboard');
+            navigate('/matchmaking');
         } else {
             navigate('/setup');
         }

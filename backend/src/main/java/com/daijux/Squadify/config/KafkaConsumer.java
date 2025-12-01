@@ -1,5 +1,6 @@
 package com.daijux.Squadify.config;
 
+import com.daijux.Squadify.event.SwipeEvent;
 import com.daijux.Squadify.event.UserRegistration;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -23,18 +24,21 @@ public class KafkaConsumer {
     @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
-    public ConsumerFactory<String, UserRegistration> consumerFactory() {
+    private Map<String, Object> getCommonProps() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
+        return props;
+    }
 
+    public ConsumerFactory<String, UserRegistration> registrationConsumerFactory() {
         JsonDeserializer<UserRegistration> jsonDeserializer = new JsonDeserializer<>(UserRegistration.class);
         jsonDeserializer.setRemoveTypeHeaders(false);
         jsonDeserializer.setUseTypeHeaders(false);
         jsonDeserializer.addTrustedPackages("*");
 
         return new DefaultKafkaConsumerFactory<>(
-                props,
+                getCommonProps(),
                 new StringDeserializer(),
                 jsonDeserializer
         );
@@ -43,7 +47,27 @@ public class KafkaConsumer {
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, UserRegistration> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, UserRegistration> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(consumerFactory());
+        factory.setConsumerFactory(registrationConsumerFactory());
+        return factory;
+    }
+
+    public ConsumerFactory<String, SwipeEvent> swipeConsumerFactory() {
+        JsonDeserializer<SwipeEvent> jsonDeserializer = new JsonDeserializer<>(SwipeEvent.class);
+        jsonDeserializer.setRemoveTypeHeaders(false);
+        jsonDeserializer.setUseTypeHeaders(false);
+        jsonDeserializer.addTrustedPackages("*");
+
+        return new DefaultKafkaConsumerFactory<>(
+                getCommonProps(),
+                new StringDeserializer(),
+                jsonDeserializer
+        );
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, SwipeEvent> swipeListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, SwipeEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(swipeConsumerFactory());
         return factory;
     }
 }
