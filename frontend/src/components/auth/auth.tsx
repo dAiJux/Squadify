@@ -138,9 +138,9 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
         } else if (response.status === 409) {
           const errorData = await response.json();
           if (errorData.error === 'username_exists') {
-              setRegisterMessage('Erreur: Ce nom d\'utilisateur est déjà pris.');
+              setRegisterMessage('Ce nom d\'utilisateur est déjà pris.');
           } else {
-              setRegisterMessage('Une erreur de conflit est survenue.');
+              setRegisterMessage('Une erreur est survenue.');
           }
         } else {
           setRegisterMessage('Une erreur inattendue est survenue. Veuillez réessayer.');

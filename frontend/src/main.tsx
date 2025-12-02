@@ -8,6 +8,7 @@ import Home from './pages/home/home.tsx';
 import ProfileSetup from './pages/profile-setup/profileSetup.tsx';
 import Matchmaking from './pages/matchmaking/matchmaking.tsx';
 import AuthGuard from './guards/authGuard.tsx';
+import Header from './components/header/header.tsx';
 
 const rootElement = document.getElementById('app');
 
@@ -16,6 +17,7 @@ if (rootElement) {
     <React.StrictMode>
       <Provider store={store}>
         <BrowserRouter>
+          <Header />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route

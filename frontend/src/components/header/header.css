@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+.header {
+  @apply bg-transparent w-full;
+}
+
+.header__container {
+  @apply max-w-6xl mx-auto relative flex items-center justify-between px-6 pt-10 pb-6;
+}
+
+.header__container--home {
+  @apply pb-12;
+}
+
+.header__left,
+.header__right {
+  @apply flex items-center gap-3 z-10;
+}
+
+.header__center {
+  @apply absolute pt-6 left-0 right-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none;
+}
+
+.header__logo {
+  @apply w-16 h-16 sm:w-20 sm:h-20 pointer-events-auto cursor-pointer object-contain;
+}
+
+.header__logo--home {
+  @apply w-28 h-28 sm:w-36 sm:h-36 pointer-events-auto cursor-pointer object-contain;
+}
+
+.header__icon-button {
+  @apply p-2 rounded-md flex items-center justify-center hover:bg-slate-800 transition-colors;
+}
+
+.header__icon {
+  @apply w-6 h-6 text-gray-200;
+}
+
+@media (max-width: 640px) {
+  .header__logo {
+    @apply w-20 h-20;
+  }
+
+  .header__logo--home {
+    @apply w-28 h-28;
+  }
+
+  .header__icon {
+    @apply w-5 h-5;
+  }
+
+  .header__left,
+  .header__right {
+    @apply gap-2;
+  }
+}

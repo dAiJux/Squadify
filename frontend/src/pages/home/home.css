@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 .home-container {
-  @apply font-sans flex flex-col items-center justify-start min-h-screen w-full py-8 relative px-4 lg:px-16 overflow-x-hidden;
+  @apply font-sans flex flex-col items-center justify-start w-full py-8 relative px-4 lg:px-16 overflow-x-hidden;
 }
 
 .home-card {

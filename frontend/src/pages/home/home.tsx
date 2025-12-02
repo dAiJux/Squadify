@@ -80,11 +80,6 @@ const Home = () => {
       <div className="decor-left-joystick"></div>
       <div className="decor-right-target-ring"></div>
       <div className="decor-right-target-dot"></div>
-      <img
-        src="/icons/squadify.png"
-        alt="Logo Squadify"
-        className="logo-squadify"
-      />
       <main className="home-card">
         <p className="home-card-text">
             Squadify est la plateforme dédiée aux joueurs cherchant à former l'équipe parfaite.

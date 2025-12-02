@@ -28,7 +28,7 @@ const ProfileSetup: React.FC = () => {
 
   const handleFinish = async () => {
     if (!userId || !token) {
-        console.error("Erreur : Utilisateur non identifié ou token manquant");
+        console.error("Utilisateur non identifié ou token manquant");
         return;
     }
 
@@ -76,7 +76,7 @@ const ProfileSetup: React.FC = () => {
     <div className="setup-container">
       <div className="setup-card">
         <h1 className="setup-title">Initialisation du Profil</h1>
-        <p className="setup-subtitle">Configure ton identité de joueur pour trouver ta Squad.</p>
+        <p className="setup-subtitle">Configure ton profil de joueur pour trouver ta Squad.</p>
         <div className="setup-section">
           <h2 className="section-title">Tes jeux principaux</h2>
           <div className="options-grid">

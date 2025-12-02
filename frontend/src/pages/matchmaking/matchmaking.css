@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 .home-container {
-  @apply font-sans flex items-center justify-center min-h-screen w-full bg-slate-900 text-gray-200 relative p-6;
+  @apply font-sans flex flex-col items-center mt-4 w-full bg-slate-900 text-gray-200 relative p-6;
   overflow: hidden;
 }
 
@@ -11,7 +11,7 @@
 }
 
 .action-bar {
-  @apply fixed left-0 right-0 bottom-10 flex items-center justify-center z-30 gap-10;
+  @apply flex items-center justify-center z-30 gap-10 mt-8;
 }
 
 .action-btn {
@@ -21,15 +21,23 @@
 .action-pass {
   @apply bg-red-600 text-red-100 ring-4 ring-red-500/20;
 }
-.action-pass:hover:not(:disabled) { @apply scale-105; }
+
+.action-pass:hover:not(:disabled) {
+  @apply scale-105;
+}
 
 .action-like {
   @apply bg-teal-600 text-teal-100 ring-4 ring-teal-500/20;
 }
 .action-like:hover:not(:disabled) { @apply scale-105; }
 
+.profile-card-root.zoomed + .action-bar,
+.match-wrapper + .action-bar {
+  @apply mt-6;
+}
+
 @media (max-width: 40rem) {
-  .action-bar { @apply bottom-3 gap-7; }
+  .action-bar { @apply gap-6 mt-4; }
   .action-btn { @apply w-12 h-12; }
   .match-wrapper { max-height: calc(100vh - 7.5rem); padding: 0 0.75rem; }
 }
