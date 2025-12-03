@@ -36,11 +36,8 @@ public class WebSecurity {
                 )
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(HttpMethod.POST, "/api/auth/register", "/api/auth/login").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/**").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/profiles/setup/**").authenticated()
-                        .pathMatchers(HttpMethod.GET, "/api/profiles/**").authenticated()
-                        .pathMatchers("/api/matchmaking/**").authenticated()
-                        .anyExchange().authenticated()
+                        .pathMatchers("/api/**").authenticated()
+                        .anyExchange().permitAll()
                 )
                 .securityContextRepository(jwtSecurityContextRepository)
                 .build();

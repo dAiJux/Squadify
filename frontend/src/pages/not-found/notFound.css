@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --header-height: 64px;
+}
+
+.nf-container {
+  @apply font-sans flex flex-col items-center justify-start w-full px-4 lg:px-16 relative overflow-hidden bg-slate-900 text-gray-200;
+  padding-top: var(--header-height, 64px);
+  padding-bottom: 2.5rem;
+  gap: 1.5rem;
+}
+
+.nf-card {
+  @apply flex flex-col items-center gap-6 text-center max-w-xl w-full p-8
+         bg-slate-900/70 backdrop-blur-lg border border-blue-500/30
+         rounded-2xl shadow-2xl shadow-blue-500/10 relative z-10;
+  margin-top: 3.5rem;
+}
+
+.nf-title {
+  @apply text-6xl md:text-7xl font-extrabold tracking-tight;
+}
+
+.nf-text {
+  @apply text-gray-300 text-base md:text-lg;
+}
+
+.nf-actions {
+  @apply flex flex-col gap-4 w-full items-center mt-4;
+}
+
+.nf-button {
+  @apply w-2/3 max-w-xs;
+}
+
+.nf-decor-blue {
+  @apply absolute top-1/4 left-1/6 w-36 h-36 md:w-48 md:h-48 bg-blue-500/20
+         rounded-full filter blur-3xl;
+}
+
+.nf-decor-violet {
+  @apply absolute bottom-1/5 right-1/6 w-44 h-44 md:w-64 md:h-64 bg-violet-500/20
+         rounded-full filter blur-3xl;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.12; transform: scale(1); }
+  50% { opacity: 0.22; transform: scale(1.06); }
+}
+
+.animate-pulse-slow {
+  animation-name: pulse-slow;
+  animation-duration: 8s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+  animation-iteration-count: infinite;
+  will-change: opacity, transform;
+}
+
+.delay-0   { animation-delay: 0s; }
+.delay-200 { animation-delay: 2s; }
+.delay-400 { animation-delay: 4s; }
+.delay-600 { animation-delay: 6s; }

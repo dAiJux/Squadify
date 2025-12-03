@@ -7,6 +7,7 @@ import './index.css';
 import Home from './pages/home/home.tsx';
 import ProfileSetup from './pages/profile-setup/profileSetup.tsx';
 import Matchmaking from './pages/matchmaking/matchmaking.tsx';
+import NotFound from './pages/not-found/notFound.tsx';
 import AuthGuard from './guards/authGuard.tsx';
 import Header from './components/header/header.tsx';
 
@@ -36,6 +37,7 @@ if (rootElement) {
                 </AuthGuard>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </Provider>
