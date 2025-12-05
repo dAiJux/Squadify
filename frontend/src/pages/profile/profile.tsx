@@ -1,0 +1,395 @@
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../../store/store';
+import { setProfileData } from '../../store/profile';
+import { setUserData, clearUserData } from '../../store/user';
+import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '../../data/gameOptions';
+import { Edit3, Trash2 } from 'lucide-react';
+import './profile.css';
+
+const mapIdsToLabels = (ids: string[] = [], list: { id: string; label: string }[]) =>
+  ids.map(id => (list.find(item => item.id === id)?.label ?? id));
+
+const toggleSelection = (id: string, list: string[], setList: React.Dispatch<React.SetStateAction<string[]>>) => {
+  if (list.includes(id)) setList(list.filter(item => item !== id));
+  else setList([...list, id]);
+};
+
+const Profile: React.FC = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = useSelector((s: RootState) => s.user.data);
+  const token = useSelector((s: RootState) => s.user.token);
+  const profile = useSelector((s: RootState) => s.profile.data);
+
+  const savedProfileRef = useRef<any>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  const [username, setUsername] = useState(user?.username ?? '');
+  const [email, setEmail] = useState(user?.email ?? '');
+
+  const [games, setGames] = useState<string[]>(profile?.games ?? []);
+  const [schedules, setSchedules] = useState<string[]>(profile?.schedules ?? []);
+  const [playStyle, setPlayStyle] = useState<string | null>(profile?.playStyle ?? null);
+
+  const [editing, setEditing] = useState({
+    account: false,
+    games: false,
+    schedules: false,
+    style: false,
+    security: false
+  });
+
+  const [saving, setSaving] = useState(false);
+  const [pwdState, setPwdState] = useState({ current: '', next: '', confirm: '' });
+  const [pwdLoading, setPwdLoading] = useState(false);
+
+  const [activeTab, setActiveTab] = useState<'information' | 'preferences' | 'securite'>('information');
+
+  useEffect(() => {
+    if (!profile && user?.userId) {
+      (async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`/api/profiles/${user.userId}`, {
+            credentials: 'include',
+            headers: token ? { Authorization: `Bearer ${token}` } : undefined
+          });
+          if (res.ok) {
+            const data = await res.json();
+            dispatch(setProfileData(data));
+            savedProfileRef.current = data;
+            setGames(data.games ?? []);
+            setSchedules(data.schedules ?? []);
+            setPlayStyle(data.playStyle ?? null);
+          } else {
+            savedProfileRef.current = null;
+          }
+        } catch {
+          savedProfileRef.current = null;
+        } finally {
+          setLoading(false);
+        }
+      })();
+    } else {
+      savedProfileRef.current = profile ?? null;
+      setGames(profile?.games ?? []);
+      setSchedules(profile?.schedules ?? []);
+      setPlayStyle(profile?.playStyle ?? null);
+    }
+    setUsername(user?.username ?? '');
+    setEmail(user?.email ?? '');
+  }, [profile, user, dispatch, token]);
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch {}
+    dispatch(clearUserData());
+    localStorage.removeItem('squadify_token');
+    localStorage.removeItem('squadify_user_data');
+    navigate('/');
+  };
+
+  const resetSection = (section: keyof typeof editing) => {
+    if (savedProfileRef.current) {
+      if (section === 'account') {
+        setUsername(user?.username ?? '');
+        setEmail(user?.email ?? '');
+      } else if (section === 'games') setGames(savedProfileRef.current.games ?? []);
+      else if (section === 'schedules') setSchedules(savedProfileRef.current.schedules ?? []);
+      else if (section === 'style') setPlayStyle(savedProfileRef.current.playStyle ?? null);
+      else if (section === 'security') setPwdState({ current: '', next: '', confirm: '' });
+    } else {
+      if (section === 'account') {
+        setUsername(user?.username ?? '');
+        setEmail(user?.email ?? '');
+      } else if (section === 'games') setGames([]);
+      else if (section === 'schedules') setSchedules([]);
+      else if (section === 'style') setPlayStyle(null);
+      else if (section === 'security') setPwdState({ current: '', next: '', confirm: '' });
+    }
+    setNotice(null);
+    setEditing(prev => ({ ...prev, [section]: false }));
+  };
+
+  const saveProfilePartial = async (opts: { account?: boolean; games?: boolean; schedules?: boolean; style?: boolean }) => {
+    if (!user?.userId) return;
+    setSaving(true);
+    setNotice(null);
+    const payload = {
+      username,
+      email,
+      games,
+      schedules,
+      playStyle
+    };
+    try {
+      const res = await fetch(`/api/profiles/${user.userId}`, {
+        method: 'PUT',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        dispatch(setProfileData(saved));
+        dispatch(setUserData({ token: token ?? '', userId: user.userId, username: saved.username ?? username, email: saved.email ?? email, setupCompleted: true }));
+        const stored = localStorage.getItem('squadify_user_data');
+        if (stored) {
+          try {
+            const parsed = JSON.parse(stored);
+            parsed.username = saved.username ?? username;
+            parsed.email = saved.email ?? email;
+            parsed.setupCompleted = true;
+            localStorage.setItem('squadify_user_data', JSON.stringify(parsed));
+          } catch {}
+        }
+        savedProfileRef.current = saved;
+        setNotice('Sauvegarde effectuée.');
+        Object.keys(opts).forEach(k => {
+          if ((opts as any)[k]) setEditing(prev => ({ ...prev, [k]: false }));
+        });
+      } else {
+        setNotice('Erreur lors de la sauvegarde.');
+      }
+    } catch {
+      setNotice('Erreur réseau.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const changePassword = async () => {
+    if (!user?.userId) return;
+    if (pwdState.next !== pwdState.confirm) {
+      setNotice('Les nouveaux mots de passe ne correspondent pas.');
+      return;
+    }
+    setPwdLoading(true);
+    setNotice(null);
+    try {
+      const res = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ currentPassword: pwdState.current, newPassword: pwdState.next })
+      });
+      if (res.ok) {
+        setNotice('Mot de passe mis à jour.');
+        setPwdState({ current: '', next: '', confirm: '' });
+        setEditing(prev => ({ ...prev, security: false }));
+      } else if (res.status === 401) {
+        setNotice('Mot de passe actuel incorrect.');
+      } else {
+        setNotice('Erreur lors du changement de mot de passe.');
+      }
+    } catch {
+      setNotice('Erreur réseau.');
+    } finally {
+      setPwdLoading(false);
+    }
+  };
+
+  const deleteAccount = async () => {
+    if (!user?.userId) return;
+    if (!confirm('Supprimer définitivement votre compte ? Cette action est irréversible.')) return;
+    try {
+      const res = await fetch('/api/auth/delete-account', {
+        method: 'DELETE',
+        credentials: 'include',
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+      });
+      if (res.ok) {
+        dispatch(clearUserData());
+        localStorage.removeItem('squadify_token');
+        localStorage.removeItem('squadify_user_data');
+        navigate('/');
+      } else {
+        setNotice('Impossible de supprimer le compte.');
+      }
+    } catch {
+      setNotice('Erreur réseau.');
+    }
+  };
+
+  const gamesLabels = mapIdsToLabels(games, GAMES_LIST);
+  const schedulesLabels = mapIdsToLabels(schedules, SCHEDULES_LIST);
+  const playStyleLabel = PLAYSTYLES_LIST.find(p => p.id === playStyle)?.label ?? 'Non défini';
+
+  return (
+    <div className="profile-page">
+      <div className="profile-card">
+        <div className="profile-top">
+          <div className="profile-avatar-large">{user?.username?.charAt(0).toUpperCase() ?? 'J'}</div>
+          <div className="profile-meta">
+            <h1 className="profile-title">{user?.username ?? 'Joueur'}</h1>
+            <p className="profile-sub">{user?.email ?? ''}</p>
+          </div>
+          <div className="profile-actions-top">
+            <button className="logout-btn" onClick={handleLogout}>Déconnexion</button>
+          </div>
+        </div>
+
+        <div className="tabs">
+          <button className={`tab ${activeTab === 'information' ? 'active' : ''}`} onClick={() => setActiveTab('information')} aria-selected={activeTab === 'information'}>Informations</button>
+          <button className={`tab ${activeTab === 'preferences' ? 'active' : ''}`} onClick={() => setActiveTab('preferences')} aria-selected={activeTab === 'preferences'}>Préférences</button>
+          <button className={`tab ${activeTab === 'securite' ? 'active' : ''}`} onClick={() => setActiveTab('securite')} aria-selected={activeTab === 'securite'}>Sécurité</button>
+        </div>
+
+        {activeTab === 'information' && (
+          <div className="card-section">
+            <h2 className="section-title-inline">Informations <button aria-label="Modifier informations du compte" className="icon-edit-inline" onClick={() => { if (editing.account) resetSection('account'); else setEditing(prev => ({ ...prev, account: true })); }}><Edit3 size={14} /></button></h2>
+            {editing.account ? (
+              <div className="edit-block">
+                <div className="form-row">
+                  <label>Pseudo</label>
+                  <input value={username} onChange={e => setUsername(e.target.value)} />
+                </div>
+                <div className="form-row">
+                  <label>Email</label>
+                  <input value={email} onChange={e => setEmail(e.target.value)} />
+                </div>
+                <div className="section-controls">
+                  <button className="btn btnPrimary btn-small" onClick={() => saveProfilePartial({ account: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                </div>
+              </div>
+            ) : (
+              <div className="read-block">
+                <div className="row"><span className="label">Pseudo</span><span className="value">{username}</span></div>
+                <div className="row"><span className="label">Email</span><span className="value">{email}</span></div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'preferences' && (
+          <>
+            <div className="card-section">
+              <h2 className="section-title-inline">Jeux <button aria-label="Modifier jeux" className="icon-edit-inline" onClick={() => { if (editing.games) resetSection('games'); else setEditing(prev => ({ ...prev, games: true })); }}><Edit3 size={14} /></button></h2>
+              {editing.games ? (
+                <div className="edit-block">
+                  <div className="form-row">
+                    <div className="options-grid">
+                      {GAMES_LIST.map(g => (
+                        <button key={g.id} type="button" className={`option-card ${games.includes(g.id) ? 'selected' : ''}`} onClick={() => toggleSelection(g.id, games, setGames)}>{g.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="section-controls">
+                    <button className="btn btnPrimary btn-small" onClick={() => saveProfilePartial({ games: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="read-block">
+                  <div className="row"><div className="chips">{gamesLabels.map((g, i) => <span key={i} className="chip">{g}</span>)}</div></div>
+                </div>
+              )}
+            </div>
+
+            <div className="card-section">
+              <h2 className="section-title-inline">Disponibilités <button aria-label="Modifier disponibilités" className="icon-edit-inline" onClick={() => { if (editing.schedules) resetSection('schedules'); else setEditing(prev => ({ ...prev, schedules: true })); }}><Edit3 size={14} /></button></h2>
+              {editing.schedules ? (
+                <div className="edit-block">
+                  <div className="form-row">
+                    <div className="options-grid">
+                      {SCHEDULES_LIST.map(s => (
+                        <button key={s.id} type="button" className={`option-card ${schedules.includes(s.id) ? 'selected' : ''}`} onClick={() => toggleSelection(s.id, schedules, setSchedules)}>{s.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="section-controls">
+                    <button className="btn btnPrimary btn-small" onClick={() => saveProfilePartial({ schedules: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="read-block">
+                  <div className="row"><div className="chips">{schedulesLabels.map((s, i) => <span key={i} className="chip">{s}</span>)}</div></div>
+                </div>
+              )}
+            </div>
+
+            <div className="card-section">
+              <h2 className="section-title-inline">Style de jeu <button aria-label="Modifier style de jeu" className="icon-edit-inline" onClick={() => { if (editing.style) resetSection('style'); else setEditing(prev => ({ ...prev, style: true })); }}><Edit3 size={14} /></button></h2>
+              {editing.style ? (
+                <div className="edit-block">
+                  <div className="form-row">
+                    <div className="options-grid single-row">
+                      {PLAYSTYLES_LIST.map(p => (
+                        <button key={p.id} type="button" className={`option-card ${playStyle === p.id ? 'selected' : ''}`} onClick={() => setPlayStyle(p.id)}>{p.label}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="section-controls">
+                    <button className="btn btnPrimary btn-small" onClick={() => saveProfilePartial({ style: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="read-block">
+                  <div className="row"><span className="value">{playStyleLabel}</span></div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeTab === 'securite' && (
+          <>
+            <div className="card-section">
+              <h2 className="section-title-inline">Changer le mot de passe</h2>
+              <div className="security-block">
+                <p className="muted">Vous pouvez mettre à jour votre mot de passe ci-dessous.</p>
+                {editing.security ? (
+                  <div className="edit-block mt-3">
+                    <div className="form-row">
+                      <label>Mot de passe actuel</label>
+                      <input type="password" value={pwdState.current} onChange={e => setPwdState(prev => ({ ...prev, current: e.target.value }))} />
+                    </div>
+                    <div className="form-row">
+                      <label>Nouveau mot de passe</label>
+                      <input type="password" value={pwdState.next} onChange={e => setPwdState(prev => ({ ...prev, next: e.target.value }))} />
+                    </div>
+                    <div className="form-row">
+                      <label>Confirmer</label>
+                      <input type="password" value={pwdState.confirm} onChange={e => setPwdState(prev => ({ ...prev, confirm: e.target.value }))} />
+                    </div>
+                    <div className="section-controls mt-3">
+                      <button className="btn btnPrimary btn-small" onClick={changePassword} disabled={pwdLoading}>{pwdLoading ? 'Modification...' : 'Valider'}</button>
+                      <button className="btn btn-small" onClick={() => resetSection('security')}>Annuler</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="section-controls mt-3">
+                    <button className="btn btnPrimary btn-small" onClick={() => setEditing(prev => ({ ...prev, security: true }))}>Modifier le mot de passe</button>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="card-section mt-4">
+              <h2 className="section-title-inline">Suppression du compte</h2>
+              <div className="security-block">
+                  <p className="muted">La suppression est irréversible : toutes vos données seront effacées.</p>
+                  <div className="section-controls mt-3">
+                    <button className="delete-btn" onClick={deleteAccount}><Trash2 size={14} />&nbsp;Supprimer mon compte</button>
+                  </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {notice && <div className="notice">{notice}</div>}
+      </div>
+    </div>
+  );
+};
+
+export default Profile;

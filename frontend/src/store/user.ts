@@ -9,13 +9,11 @@ interface UserData {
 
 interface UserState {
   isAuthenticated: boolean;
-  token: string | null;
   data: UserData | null;
 }
 
 const initialState: UserState = {
   isAuthenticated: false,
-  token: null,
   data: null,
 };
 
@@ -23,19 +21,12 @@ export const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUserData: (state, action: PayloadAction<{ token: string } & UserData>) => {
+    setUserData: (state, action: PayloadAction<UserData>) => {
       state.isAuthenticated = true;
-      state.token = action.payload.token;
-      state.data = {
-        userId: action.payload.userId,
-        username: action.payload.username,
-        email: action.payload.email,
-        setupCompleted: action.payload.setupCompleted,
-      };
+      state.data = action.payload;
     },
     clearUserData: (state) => {
       state.isAuthenticated = false;
-      state.token = null;
       state.data = null;
     },
     completeSetup: (state) => {

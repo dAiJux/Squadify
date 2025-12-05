@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+.profile-page {
+  @apply min-h-screen flex items-start justify-center w-full px-4 lg:px-16 py-8 bg-slate-900 text-gray-200;
+}
+
+.profile-card {
+  @apply relative w-full max-w-4xl bg-slate-900/70 backdrop-blur-lg rounded-2xl border border-blue-500/30 p-6 shadow-2xl;
+}
+
+.profile-top {
+  @apply flex items-center gap-6 mb-6;
+}
+
+.profile-avatar-large {
+  @apply w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-blue-300 text-2xl font-bold border-2 border-violet-500/30;
+}
+
+.profile-meta {
+  @apply flex-1;
+}
+
+.profile-title {
+  @apply text-3xl font-extrabold text-blue-400;
+}
+
+.profile-sub {
+  @apply text-sm text-gray-400 mt-1;
+}
+
+.profile-actions-top {
+  @apply ml-4;
+}
+
+.logout-btn {
+  @apply px-5 py-2 rounded-md text-sm font-semibold uppercase tracking-wider bg-red-600 text-white border border-red-500 transition-all duration-300 ease-in-out cursor-pointer;
+  box-shadow: 0 0 5px theme(colors.red.500),
+              0 0 10px theme(colors.red.900);
+}
+
+.logout-btn:hover {
+  @apply bg-red-500;
+  box-shadow: 0 0 10px theme(colors.red.400),
+              0 0 20px theme(colors.red.600),
+              0 0 30px theme(colors.red.800);
+}
+
+.tabs {
+  @apply flex gap-2 mt-2;
+}
+
+.tab {
+  @apply px-3 py-2 rounded-md text-sm text-gray-300 bg-transparent border border-transparent cursor-pointer;
+}
+
+.tab.active {
+  @apply bg-slate-800/60 text-white border border-blue-500/30;
+}
+
+.card-section {
+  @apply mt-6 pt-4 border-t border-gray-800/40;
+}
+
+.section-title-inline {
+  @apply text-violet-400 text-sm uppercase tracking-widest font-bold inline-flex items-center gap-2;
+  margin: 0;
+}
+
+.icon-edit-inline {
+  @apply text-gray-300 bg-transparent px-1 py-0.5 rounded-md;
+  border: none;
+  cursor: pointer;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.icon-edit-inline:hover {
+  @apply bg-slate-800/40;
+  box-shadow: 0 0 8px rgba(0,0,0,0.4) inset;
+}
+
+.read-block {
+  @apply mb-2;
+}
+
+.row {
+  @apply flex items-center gap-4 mt-2;
+}
+
+.label {
+  @apply w-36 text-sm text-gray-400;
+}
+
+.value {
+  @apply text-gray-200;
+}
+
+.chips {
+  @apply flex flex-wrap gap-2;
+}
+
+.chip {
+  @apply bg-slate-800/60 text-gray-300 py-1 px-3 rounded-lg text-sm;
+}
+
+.edit-block {
+  @apply mb-2;
+}
+
+.form-row {
+  @apply mt-3 flex flex-col gap-2;
+}
+
+.form-row label {
+  @apply text-sm text-gray-300 font-medium;
+}
+
+.form-row input {
+  @apply bg-slate-800/60 border border-gray-700/40 rounded-md p-2 text-gray-200;
+}
+
+.options-grid {
+  @apply flex flex-wrap gap-3 mt-2;
+}
+
+.options-grid.single-row {
+  @apply flex-nowrap overflow-auto;
+}
+
+.option-card {
+  @apply bg-slate-800/60 text-gray-300 py-1 px-3 rounded-md cursor-pointer transition-all duration-150 border border-gray-700;
+  font-size: 0.95rem;
+}
+
+.option-card:hover {
+  @apply bg-slate-700;
+}
+
+.option-card.selected {
+  @apply bg-blue-900/40 text-blue-200 border-blue-400 shadow-md font-semibold;
+}
+
+.section-controls {
+  @apply mt-6 flex gap-3 items-center;
+}
+
+.btn-small {
+  @apply text-sm px-4 py-2 rounded-md;
+}
+
+.btn-small.btnPrimary {
+  @apply text-sm px-5 py-2 rounded-md;
+}
+
+.btn-small:hover {
+  @apply opacity-95;
+}
+
+.delete-btn {
+  @apply inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wider bg-transparent text-red-400 border border-red-500 transition-all duration-300 ease-in-out cursor-pointer;
+  box-shadow: 0 0 5px theme(colors.red.900),
+              inset 0 0 5px theme(colors.red.900);
+}
+
+.delete-btn:hover {
+  @apply bg-red-900/40 text-red-300;
+  box-shadow: 0 0 10px theme(colors.red.600),
+              inset 0 0 10px theme(colors.red.600);
+}
+
+.security-block {
+  @apply mt-2;
+}
+
+.security-row {
+  @apply flex items-center justify-between gap-4;
+}
+
+.security-title {
+  @apply text-sm font-semibold text-gray-200;
+}
+
+.notice {
+  @apply mt-6 text-sm text-green-300;
+}
+
+.muted {
+  @apply text-gray-400;
+}
+
+@media (max-width: 640px) {
+  .profile-top {
+    @apply flex-col items-start;
+  }
+
+  .logout-btn {
+    @apply px-4 py-2 text-sm;
+  }
+
+  .label {
+    @apply w-28;
+  }
+
+  .option-card {
+    @apply text-sm py-1 px-2;
+  }
+
+  .tabs {
+    @apply flex-wrap gap-2;
+  }
+
+  .section-controls {
+    @apply flex-col items-start;
+  }
+}

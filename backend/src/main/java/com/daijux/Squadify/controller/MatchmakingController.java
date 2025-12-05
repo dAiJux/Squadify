@@ -5,6 +5,7 @@ import com.daijux.Squadify.event.SwipeEvent;
 import com.daijux.Squadify.service.MatchmakingService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/matchmaking")
@@ -22,11 +23,7 @@ public class MatchmakingController {
     }
 
     @PostMapping("/swipe")
-    public void swipe(@RequestBody SwipeEvent swipeEvent) {
-        matchmakingService.processSwipe(
-                swipeEvent.getSwiperUserId(),
-                swipeEvent.getTargetUserId(),
-                swipeEvent.getType()
-        );
+    public Mono<Void> swipe(@RequestBody SwipeEvent swipeEvent) {
+        return matchmakingService.processAndSaveSwipe(swipeEvent);
     }
 }

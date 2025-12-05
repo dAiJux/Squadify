@@ -3,8 +3,6 @@ package com.daijux.Squadify.service;
 import com.daijux.Squadify.dto.AuthResponse;
 import com.daijux.Squadify.dto.LoginRequest;
 import com.daijux.Squadify.dto.RegistrationRequest;
-import com.daijux.Squadify.event.UserRegistration;
-import com.daijux.Squadify.kafka.RegistrationProducer;
 import com.daijux.Squadify.repository.User;
 import com.daijux.Squadify.security.JwtTokenProvider;
 import org.slf4j.Logger;
@@ -26,18 +24,15 @@ public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     private final User user;
-    private final RegistrationProducer registrationProducer;
     private final ReactiveAuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
     public AuthService(User user,
-                       RegistrationProducer registrationProducer,
                        ReactiveAuthenticationManager authenticationManager,
                        JwtTokenProvider jwtTokenProvider,
                        PasswordEncoder passwordEncoder) {
         this.user = user;
-        this.registrationProducer = registrationProducer;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
@@ -70,17 +65,9 @@ public class AuthService {
                     newUser.setPassword(passwordEncoder.encode(request.getPassword()));
 
                     return user.save(newUser)
-                            .flatMap(savedUser -> {
-                                UserRegistration event = UserRegistration.builder()
-                                        .username(savedUser.getUsername())
-                                        .email(savedUser.getEmail())
-                                        .build();
-
-                                return registrationProducer.sendRegistrationEvent(event)
-                                        .thenReturn(Map.of("message", "Inscription réussie."));
-                            })
+                            .map(savedUser -> Map.of("message", "Inscription réussie."))
                             .onErrorResume(e -> {
-                                log.error("Erreur lors de la sauvegarde synchrone de l'utilisateur {}: {}", request.getEmail(), e.getMessage());
+                                log.error("Erreur lors de la sauvegarde de l'utilisateur {}: {}", request.getEmail(), e.getMessage());
                                 return Mono.just(Map.of("error", "save_failed", "message", "Erreur serveur lors de l'enregistrement du compte."));
                             });
                 });
@@ -107,4 +94,17 @@ public class AuthService {
                 })
                 .onErrorResume(e -> Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiants invalides")));
     }
+
+    public Mono<AuthResponse> validateAndGetUser(String token) {
+        if (!jwtTokenProvider.validateToken(token)) return Mono.empty();
+        String userId = jwtTokenProvider.getUserIdFromToken(token);
+        return user.findById(userId)
+                .map(user -> AuthResponse.builder()
+                        .userId(user.getId())
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .setupCompleted(user.isSetupCompleted())
+                        .build());
+    }
+
 }

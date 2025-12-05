@@ -15,16 +15,13 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
-
   const [registerUsername, setRegisterUsername] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
   const [registerMessage, setRegisterMessage] = useState<string | null>(null);
-
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginMessage, setLoginMessage] = useState<string | null>(null);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -33,124 +30,80 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
     setLoginMessage(null);
   }, [initialTab]);
 
-  if (!isOpen) {
-    return null;
-  }
+  if (!isOpen) return null;
 
-  const handleModalContentClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
+  const handleModalContentClick = (e: React.MouseEvent) => e.stopPropagation();
 
   const attemptLogin = async (identifier: string, password: string) => {
     setLoginMessage(null);
 
-    const loginData = {
-      identifier: identifier,
-      password: password,
-    };
-
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(loginData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password }),
+        credentials: 'include'
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const userData = {
-            token: data.token,
-            userId: data.userId,
-            username: data.username,
-            email: data.email,
-            setupCompleted: data.setupCompleted
-        };
-
-        localStorage.setItem('squadify_token', data.token);
-        localStorage.setItem('squadify_user_data', JSON.stringify(userData));
-
-        dispatch(setUserData(userData));
+        const meRes = await fetch('/api/auth/me', { credentials: 'include' });
+        if (!meRes.ok) throw new Error("Impossible de récupérer l'utilisateur");
+        const data = await meRes.json();
+        dispatch(setUserData(data));
 
         onClose();
-
         if (data.setupCompleted) {
-            try {
-                const profileRes = await fetch(`/api/profiles/${data.userId}`, {
-                    headers: { 'Authorization': `Bearer ${data.token}` }
-                });
-                if (profileRes.ok) {
-                    const profileData = await profileRes.json();
-                    dispatch(setProfileData(profileData));
-                }
-            } catch (err) {
-                console.error("Impossible de charger le profil", err);
-            }
-            navigate('/matchmaking');
+          const profileRes = await fetch(`/api/profiles/${data.userId}`, { credentials: 'include' });
+          if (profileRes.ok) {
+            const profileData = await profileRes.json();
+            dispatch(setProfileData(profileData));
+          }
+          navigate('/matchmaking');
         } else {
-            navigate('/setup');
+          navigate('/setup');
         }
+
         return { success: true };
       } else if (response.status === 401) {
         setLoginMessage('Identifiant ou mot de passe incorrect.');
-        return { success: false, message: 'Identifiant ou mot de passe incorrect.' };
+        return { success: false };
       } else {
-        setLoginMessage('Une erreur inattendue est survenue lors de la connexion. Veuillez réessayer.');
-        return { success: false, message: 'Erreur inattendue.' };
+        setLoginMessage('Une erreur inattendue est survenue.');
+        return { success: false };
       }
-    } catch (error) {
-      return { success: false, message: 'Erreur de connexion serveur.' };
+    } catch {
+      setLoginMessage('Erreur de connexion serveur.');
+      return { success: false };
     }
   };
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setIsSubmitting(true);
-      setRegisterMessage(null);
+    e.preventDefault();
+    setIsSubmitting(true);
+    setRegisterMessage(null);
 
-      const registrationData = {
-        username: registerUsername,
-        email: registerEmail,
-        password: registerPassword,
-      };
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: registerUsername, email: registerEmail, password: registerPassword }),
+        credentials: 'include'
+      });
 
-      const tempPassword = registerPassword;
-      const tempIdentifier = registerUsername;
-
-      try {
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(registrationData),
-        });
-
-        if (response.ok || response.status === 202) {
-          setRegisterMessage('Inscription réussie. Connexion en cours...');
-
-          const loginResult = await attemptLogin(registerUsername, registerPassword);
-          if (!loginResult.success) {
-              setRegisterMessage('Inscription réussie, mais échec de la connexion automatique. Veuillez vous connecter manuellement.');
-              setActiveTab('login');
-          }
-        } else if (response.status === 409) {
-          const errorData = await response.json();
-          if (errorData.error === 'username_exists') {
-              setRegisterMessage('Ce nom d\'utilisateur est déjà pris.');
-          } else {
-              setRegisterMessage('Une erreur est survenue.');
-          }
-        } else {
-          setRegisterMessage('Une erreur inattendue est survenue. Veuillez réessayer.');
-        }
-      } catch (error) {
-        setRegisterMessage('Erreur de connexion serveur.');
-      } finally {
-        setIsSubmitting(false);
+      if (response.ok) {
+        setRegisterMessage('Inscription réussie. Connexion en cours...');
+        const loginResult = await attemptLogin(registerUsername, registerPassword);
+        if (!loginResult.success) setActiveTab('login');
+      } else {
+        const errorData = await response.json();
+        setRegisterMessage(errorData.message || 'Erreur inattendue.');
       }
-    };
+    } catch {
+      setRegisterMessage('Erreur de connexion serveur.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,121 +117,30 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
       <div className="modal-content" onClick={handleModalContentClick}>
         <div className="modal-header-flow">
           <div className="modal-tabs">
-            <button
-              onClick={() => setActiveTab('login')}
-              className={`modal-tab ${activeTab === 'login' ? 'modal-tab-active' : 'modal-tab-inactive'}`}
-            >
-              Connexion
-            </button>
-            <button
-              onClick={() => setActiveTab('register')}
-              className={`modal-tab ${activeTab === 'register' ? 'modal-tab-active' : 'modal-tab-inactive'}`}
-            >
-              Inscription
-            </button>
+            <button onClick={() => setActiveTab('login')} className={`modal-tab ${activeTab === 'login' ? 'modal-tab-active' : 'modal-tab-inactive'}`}>Connexion</button>
+            <button onClick={() => setActiveTab('register')} className={`modal-tab ${activeTab === 'register' ? 'modal-tab-active' : 'modal-tab-inactive'}`}>Inscription</button>
           </div>
-          <button
-            onClick={onClose}
-            className="modal-close-btn-flow"
-            aria-label="Fermer le modal"
-          >
-            <svg className="modal-close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button onClick={onClose} className="modal-close-btn-flow" aria-label="Fermer le modal">
+            <svg className="modal-close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
         <div className="modal-form-container">
           {activeTab === 'login' ? (
             <form className="modal-form" onSubmit={handleLoginSubmit}>
               <h2 className="modal-title">Vos coéquipiers vous attendent !</h2>
-              {loginMessage && (
-                  <p className={`text-center font-medium text-red-400`}>
-                      {loginMessage}
-                  </p>
-              )}
-              <div>
-                <label htmlFor="login-identifier" className="modal-label">Email ou Nom d'utilisateur</label>
-                <input
-                  type="text"
-                  id="login-identifier"
-                  placeholder="votre.email@exemple.com ou Pseudo"
-                  className="modal-input"
-                  value={loginIdentifier}
-                  onChange={(e) => setLoginIdentifier(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="login-password" className="modal-label">Mot de passe</label>
-                <input
-                  type="password"
-                  id="login-password"
-                  placeholder="••••••••"
-                  className="modal-input"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="modal-btn"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Connexion...' : 'Se connecter'}
-              </button>
+              {loginMessage && <p className="text-center font-medium text-red-400">{loginMessage}</p>}
+              <input type="text" placeholder="Email ou Pseudo" className="modal-input" value={loginIdentifier} onChange={e => setLoginIdentifier(e.target.value)} required />
+              <input type="password" placeholder="••••••••" className="modal-input" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
+              <button type="submit" className="modal-btn" disabled={isSubmitting}>{isSubmitting ? 'Connexion...' : 'Se connecter'}</button>
             </form>
           ) : (
             <form className="modal-form" onSubmit={handleRegisterSubmit}>
               <h2 className="modal-title">Envie de rejoindre une équipe ?</h2>
-              {registerMessage && (
-                  <p className={`text-center font-medium ${registerMessage.includes('réussie') ? 'text-green-400' : 'text-red-400'}`}>
-                      {registerMessage}
-                  </p>
-              )}
-              <div>
-                <label htmlFor="register-username" className="modal-label">Nom d'utilisateur</label>
-                <input
-                  type="text"
-                  id="register-username"
-                  placeholder="Pseudo"
-                  className="modal-input"
-                  value={registerUsername}
-                  onChange={(e) => setRegisterUsername(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="register-email" className="modal-label">Email</label>
-                <input
-                  type="email"
-                  id="register-email"
-                  placeholder="votre.email@exemple.com"
-                  className="modal-input"
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <label htmlFor="register-password" className="modal-label">Mot de passe</label>
-                <input
-                  type="password"
-                  id="register-password"
-                  placeholder="••••••••"
-                  className="modal-input"
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                className="modal-btn"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Création...' : 'Créer un compte'}
-              </button>
+              {registerMessage && <p className={`text-center font-medium ${registerMessage.includes('réussie') ? 'text-green-400' : 'text-red-400'}`}>{registerMessage}</p>}
+              <input type="text" placeholder="Pseudo" className="modal-input" value={registerUsername} onChange={e => setRegisterUsername(e.target.value)} required />
+              <input type="email" placeholder="Email" className="modal-input" value={registerEmail} onChange={e => setRegisterEmail(e.target.value)} required />
+              <input type="password" placeholder="••••••••" className="modal-input" value={registerPassword} onChange={e => setRegisterPassword(e.target.value)} required />
+              <button type="submit" className="modal-btn" disabled={isSubmitting}>{isSubmitting ? 'Création...' : 'Créer un compte'}</button>
             </form>
           )}
         </div>

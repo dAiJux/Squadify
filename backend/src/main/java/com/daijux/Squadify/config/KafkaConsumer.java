@@ -35,7 +35,7 @@ public class KafkaConsumer {
         JsonDeserializer<UserRegistration> jsonDeserializer = new JsonDeserializer<>(UserRegistration.class);
         jsonDeserializer.setRemoveTypeHeaders(false);
         jsonDeserializer.setUseTypeHeaders(false);
-        jsonDeserializer.addTrustedPackages("*");
+        jsonDeserializer.addTrustedPackages("com.daijux.Squadify.event");
 
         return new DefaultKafkaConsumerFactory<>(
                 getCommonProps(),
@@ -55,7 +55,7 @@ public class KafkaConsumer {
         JsonDeserializer<SwipeEvent> jsonDeserializer = new JsonDeserializer<>(SwipeEvent.class);
         jsonDeserializer.setRemoveTypeHeaders(false);
         jsonDeserializer.setUseTypeHeaders(false);
-        jsonDeserializer.addTrustedPackages("*");
+        jsonDeserializer.addTrustedPackages("com.daijux.Squadify.event");
 
         return new DefaultKafkaConsumerFactory<>(
                 getCommonProps(),

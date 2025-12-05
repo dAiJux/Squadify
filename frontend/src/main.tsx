@@ -7,6 +7,7 @@ import './index.css';
 import Home from './pages/home/home.tsx';
 import ProfileSetup from './pages/profile-setup/profileSetup.tsx';
 import Matchmaking from './pages/matchmaking/matchmaking.tsx';
+import Profile from './pages/profile/profile.tsx';
 import NotFound from './pages/not-found/notFound.tsx';
 import AuthGuard from './guards/authGuard.tsx';
 import Header from './components/header/header.tsx';
@@ -34,6 +35,14 @@ if (rootElement) {
               element={
                 <AuthGuard requireSetup={true}>
                   <Matchmaking />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/profile"
+              element={
+                <AuthGuard requireSetup={true}>
+                  <Profile />
                 </AuthGuard>
               }
             />

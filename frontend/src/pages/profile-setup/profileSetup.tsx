@@ -11,7 +11,6 @@ const ProfileSetup: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userId = useSelector((state: RootState) => state.user.data?.userId);
-  const token = useSelector((state: RootState) => state.user.token);
 
   const [selectedGames, setSelectedGames] = useState<string[]>([]);
   const [selectedSchedules, setSelectedSchedules] = useState<string[]>([]);
@@ -27,9 +26,9 @@ const ProfileSetup: React.FC = () => {
   };
 
   const handleFinish = async () => {
-    if (!userId || !token) {
-        console.error("Utilisateur non identifié ou token manquant");
-        return;
+    if (!userId) {
+      console.error("Utilisateur non identifié");
+      return;
     }
 
     setIsSaving(true);
@@ -43,10 +42,8 @@ const ProfileSetup: React.FC = () => {
     try {
       const response = await fetch(`/api/profiles/setup/${userId}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(profileData)
       });
 
@@ -56,9 +53,9 @@ const ProfileSetup: React.FC = () => {
 
         const storedDataStr = localStorage.getItem('squadify_user_data');
         if (storedDataStr) {
-            const storedData = JSON.parse(storedDataStr);
-            storedData.setupCompleted = true;
-            localStorage.setItem('squadify_user_data', JSON.stringify(storedData));
+          const storedData = JSON.parse(storedDataStr);
+          storedData.setupCompleted = true;
+          localStorage.setItem('squadify_user_data', JSON.stringify(storedData));
         }
 
         navigate('/matchmaking');

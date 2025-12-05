@@ -17,6 +17,9 @@ import reactor.core.publisher.Mono;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Objects;
+import java.util.stream.Stream;
+
 @Service
 public class MatchmakingService {
 
@@ -83,6 +86,7 @@ public class MatchmakingService {
             com.daijux.Squadify.model.Swipe swipe = new com.daijux.Squadify.model.Swipe(event.getSwiperUserId(), event.getTargetUserId(), SwipeType.PASS);
             return SwipeRepo.save(swipe).then();
         }
+
         com.daijux.Squadify.model.Swipe newSwipe = new com.daijux.Squadify.model.Swipe(event.getSwiperUserId(), event.getTargetUserId(), SwipeType.LIKE);
         Mono<com.daijux.Squadify.model.Swipe> saveSwipe = SwipeRepo.save(newSwipe);
         Mono<com.daijux.Squadify.model.Swipe> reciprocalSwipe = SwipeRepo.findBySwiperIdAndTargetIdAndType(
@@ -93,16 +97,23 @@ public class MatchmakingService {
 
         return saveSwipe.then(reciprocalSwipe)
                 .flatMap(existingLike -> {
-                    String user1Id = java.util.stream.Stream.of(event.getSwiperUserId(), event.getTargetUserId())
-                            .min(String::compareTo).get();
-                    String user2Id = java.util.stream.Stream.of(event.getSwiperUserId(), event.getTargetUserId())
-                            .max(String::compareTo).get();
+                    String user1Id = Stream.of(event.getSwiperUserId(), event.getTargetUserId())
+                            .filter(Objects::nonNull)
+                            .min(String::compareTo)
+                            .orElseThrow();
+                    String user2Id = Stream.of(event.getSwiperUserId(), event.getTargetUserId())
+                            .filter(Objects::nonNull)
+                            .max(String::compareTo)
+                            .orElseThrow();
+
                     com.daijux.Squadify.model.Match newMatch = new com.daijux.Squadify.model.Match(user1Id, user2Id);
                     return MatchRepo.save(newMatch).then();
                 })
                 .onErrorResume(e -> {
                     if (e instanceof java.util.NoSuchElementException) {
-                        log.info("Aucun match trouvé pour {} -> {}.", event.getSwiperUserId().substring(0, 6), event.getTargetUserId().substring(0, 6));
+                        log.info("Aucun match trouvé pour {} -> {}.",
+                                event.getSwiperUserId() != null ? event.getSwiperUserId().substring(0, 6) : "null",
+                                event.getTargetUserId() != null ? event.getTargetUserId().substring(0, 6) : "null");
                         return Mono.empty();
                     }
                     log.error("Erreur critique lors du traitement du match : {}", e.getMessage());

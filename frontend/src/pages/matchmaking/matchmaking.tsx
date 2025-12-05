@@ -10,7 +10,6 @@ type SwipeType = 'LIKE' | 'PASS';
 
 const Matchmaking: React.FC = () => {
   const userId = useSelector((state: RootState) => state.user.data?.userId);
-  const token = useSelector((state: RootState) => state.user.token);
 
   const [candidates, setCandidates] = useState<any[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -21,21 +20,32 @@ const Matchmaking: React.FC = () => {
   const currentCandidate = candidates[currentIndex];
 
   const fetchCandidates = useCallback(async () => {
-    if (!userId || !token) { setError('Utilisateur non authentifié.'); setIsLoading(false); return; }
-    setIsLoading(true); setError(null);
+    if (!userId) {
+      setError('Utilisateur non authentifié.');
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch(`/api/matchmaking/candidates/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        credentials: 'include'
       });
       if (response.ok) {
         const data = await response.json();
         setCandidates(data);
         setCurrentIndex(0);
-      } else { setError('Impossible de charger les coéquipiers. Statut : ' + response.status); }
-    } catch (err) {
+      } else if (response.status === 401) {
+        setError("Non autorisé. Veuillez vous reconnecter.");
+      } else {
+        setError('Impossible de charger les coéquipiers. Statut : ' + response.status);
+      }
+    } catch {
       setError('Erreur de connexion au serveur.');
-    } finally { setIsLoading(false); }
-  }, [userId, token]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [userId]);
 
   useEffect(() => { fetchCandidates(); }, [fetchCandidates]);
 
@@ -46,7 +56,8 @@ const Matchmaking: React.FC = () => {
     try {
       await fetch('/api/matchmaking/swipe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(swipeData)
       });
     } catch (err) {
@@ -55,7 +66,7 @@ const Matchmaking: React.FC = () => {
       setCurrentIndex(i => i + 1);
       setIsSwiping(false);
     }
-  }, [currentCandidate, isSwiping, userId, token]);
+  }, [currentCandidate, isSwiping, userId]);
 
   if (isLoading) return (
     <div className="home-container">

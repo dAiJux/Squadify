@@ -1,7 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { RootState } from '../store/store';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -11,29 +9,46 @@ interface AuthGuardProps {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children, requireSetup = true }) => {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
-  const setupCompleted = useSelector((state: RootState) => state.user.data?.setupCompleted);
+  const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [setupCompleted, setSetupCompleted] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/');
-      return;
-    }
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          setIsAuthenticated(true);
+          setSetupCompleted(data.setupCompleted);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch {
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
-    if (requireSetup && !setupCompleted) {
-      if (location.pathname !== '/setup') {
+  useEffect(() => {
+    if (!loading) {
+      if (!isAuthenticated) {
+        navigate('/');
+        return;
+      }
+      if (requireSetup && !setupCompleted && location.pathname !== '/setup') {
         navigate('/setup');
       }
-    }
-
-    if (location.pathname === '/setup' && setupCompleted) {
+      if (location.pathname === '/setup' && setupCompleted) {
         navigate('/matchmaking');
+      }
     }
+  }, [loading, isAuthenticated, setupCompleted, requireSetup, navigate, location]);
 
-  }, [isAuthenticated, setupCompleted, requireSetup, navigate, location]);
-
-  if (!isAuthenticated) return null;
+  if (loading || !isAuthenticated) return null;
   if (requireSetup && !setupCompleted) return null;
   if (location.pathname === '/setup' && setupCompleted) return null;
 

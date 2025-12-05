@@ -2,6 +2,7 @@ package com.daijux.Squadify.security;
 
 import com.daijux.Squadify.model.User;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
@@ -27,6 +28,13 @@ public class JwtSecurityContextRepository implements ServerSecurityContextReposi
     @Override
     public Mono<SecurityContext> load(ServerWebExchange exchange) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
+        if (authHeader == null) {
+            HttpCookie cookie = exchange.getRequest().getCookies().getFirst("squadify_token");
+            if (cookie != null) {
+                authHeader = "Bearer " + cookie.getValue();
+            }
+        }
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);

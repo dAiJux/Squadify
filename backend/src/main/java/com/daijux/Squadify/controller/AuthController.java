@@ -4,7 +4,9 @@ import com.daijux.Squadify.dto.AuthResponse;
 import com.daijux.Squadify.dto.LoginRequest;
 import com.daijux.Squadify.dto.RegistrationRequest;
 import com.daijux.Squadify.service.AuthService;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -26,14 +28,50 @@ public class AuthController {
         return authService.register(request)
                 .map(response -> {
                     if (response.containsKey("error")) {
-                        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+                        return ResponseEntity.status(HttpStatus.CONFLICT)
+                                .body(Map.of("error", "Registration failed"));
                     }
-                    return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+                    return ResponseEntity.status(HttpStatus.CREATED).body(response);
                 });
     }
 
     @PostMapping("/login")
-    public Mono<AuthResponse> login(@RequestBody LoginRequest request) {
-        return authService.login(request);
+    public Mono<ResponseEntity<Void>> login(@RequestBody LoginRequest request) {
+        return authService.login(request)
+                .map(authResponse -> {
+                    ResponseCookie cookie = ResponseCookie.from("squadify_token", authResponse.getToken())
+                            .httpOnly(true)
+                            .secure(true)
+                            .path("/")
+                            .maxAge(7 * 24 * 60 * 60)
+                            .sameSite("Strict")
+                            .build();
+                    return ResponseEntity.ok()
+                            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                            .<Void>build();
+                })
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
+    }
+
+    @GetMapping("/me")
+    public Mono<ResponseEntity<AuthResponse>> me(@CookieValue(name = "squadify_token", required = false) String token) {
+        if (token == null) return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        return authService.validateAndGetUser(token)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @PostMapping("/logout")
+    public Mono<ResponseEntity<Void>> logout() {
+        ResponseCookie cookie = ResponseCookie.from("squadify_token", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build();
+        return Mono.just(ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .build());
     }
 }

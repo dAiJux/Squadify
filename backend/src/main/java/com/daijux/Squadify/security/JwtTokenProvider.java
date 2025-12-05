@@ -3,21 +3,21 @@ package com.daijux.Squadify.security;
 import com.daijux.Squadify.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.crypto.SecretKey;
 
 @Component
 public class JwtTokenProvider {
@@ -30,14 +30,28 @@ public class JwtTokenProvider {
     @Value("${jwt.expiration}")
     private long jwtExpiration;
 
-    private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(jwtSecret);
-        return Keys.hmacShaKeyFor(keyBytes);
+    private volatile SecretKey signingKey;
+
+    private SecretKey getSigningKey() {
+        if (signingKey != null) return signingKey;
+
+        synchronized (this) {
+            if (signingKey != null) return signingKey;
+
+            byte[] keyBytes;
+            try {
+                keyBytes = Decoders.BASE64.decode(jwtSecret);
+            } catch (IllegalArgumentException ex) {
+                keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+            }
+            signingKey = Keys.hmacShaKeyFor(keyBytes);
+            return signingKey;
+        }
     }
 
-    private JwtParser getJwtParser() {
+    private io.jsonwebtoken.JwtParser getJwtParser() {
         return Jwts.parser()
-                .verifyWith((SecretKey) getSigningKey())
+                .verifyWith(getSigningKey())
                 .build();
     }
 
@@ -66,12 +80,14 @@ public class JwtTokenProvider {
         try {
             getAllClaimsFromToken(authToken);
             return true;
-        } catch (SecurityException ex) {
-            logger.error("Signature JWT invalide (SecurityException) : {}", ex.getMessage());
         } catch (ExpiredJwtException ex) {
-            logger.error("Token JWT expiré : {}", ex.getMessage());
+            logger.debug("Token JWT expiré");
+        } catch (SecurityException ex) {
+            logger.debug("Signature JWT invalide");
+        } catch (JwtException ex) {
+            logger.debug("Erreur de validation JWT");
         } catch (Exception ex) {
-            logger.error("Erreur de validation JWT : {}", ex.getMessage());
+            logger.error("Erreur inattendue lors de la validation JWT", ex);
         }
         return false;
     }
@@ -85,11 +101,11 @@ public class JwtTokenProvider {
     }
 
     public List<String> getRolesFromToken(String token) {
-        List<?> rolesObject = getAllClaimsFromToken(token).get("roles", List.class);
-        if (rolesObject == null) {
+        Object rolesObject = getAllClaimsFromToken(token).get("roles");
+        if (!(rolesObject instanceof List<?> rolesList)) {
             return List.of();
         }
-        return rolesObject.stream()
+        return rolesList.stream()
                 .map(Object::toString)
                 .collect(Collectors.toList());
     }

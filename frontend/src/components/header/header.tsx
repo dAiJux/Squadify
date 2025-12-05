@@ -1,24 +1,20 @@
 import React from 'react';
 import { useNavigate, useLocation, matchPath } from 'react-router-dom';
 import { MessageSquare, User } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 import './header.css';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const path = location.pathname;
-  const isHome = path === '/';
-  const isSetup = path === '/setup';
+  const user = useSelector((s: RootState) => s.user.data);
 
-  const routePatterns = [
-    '/',
-    '/setup',
-    '/matchmaking',
-    '/chat',
-    '/profile',
-  ];
+  const isHome = location.pathname === '/';
+  const isSetup = location.pathname === '/setup';
 
-  const isKnownRoute = routePatterns.some((pattern) => !!matchPath(pattern, path));
+  const routePatterns = ['/', '/setup', '/matchmaking/*', '/chat', '/profile/*', '/profile'];
+  const isKnownRoute = routePatterns.some((pattern) => !!matchPath(pattern, location.pathname));
   const isNotFound = !isKnownRoute;
   const logoSrc = isHome ? '/icons/squadify.png' : '/SVGs/squadify_ico.svg';
 
@@ -47,7 +43,7 @@ const Header: React.FC = () => {
             <button
               type="button"
               aria-label="Discussions"
-              onClick={() => navigate('/setup')}
+              onClick={() => navigate('/chat')}
               className="header__icon-button"
             >
               <MessageSquare className="header__icon" />
@@ -55,8 +51,8 @@ const Header: React.FC = () => {
             <button
               type="button"
               aria-label="Profil"
-              onClick={() => navigate('/setup')}
-              className="header__icon-button"
+              onClick={() => navigate('/profile')}
+              className="header__icon-button header__profile-btn"
             >
               <User className="header__icon" />
             </button>

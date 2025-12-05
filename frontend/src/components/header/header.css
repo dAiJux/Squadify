@@ -26,32 +26,21 @@
 }
 
 .header__logo--home {
-  @apply w-28 h-28 sm:w-36 sm:h-36 pointer-events-auto cursor-pointer object-contain;
+  @apply w-28 h-28 sm:w-36 sm:h-36;
 }
 
 .header__icon-button {
-  @apply p-2 rounded-md flex items-center justify-center hover:bg-slate-800 transition-colors;
+  @apply p-2 rounded-md flex items-center justify-center hover:bg-slate-800 transition-colors cursor-pointer;
 }
 
 .header__icon {
   @apply w-6 h-6 text-gray-200;
 }
 
-@media (max-width: 640px) {
-  .header__logo {
-    @apply w-20 h-20;
-  }
+.header__profile-btn {
+  @apply p-0 rounded-full;
+}
 
-  .header__logo--home {
-    @apply w-28 h-28;
-  }
-
-  .header__icon {
-    @apply w-5 h-5;
-  }
-
-  .header__left,
-  .header__right {
-    @apply gap-2;
-  }
+.header__avatar {
+  @apply w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-violet-600 text-white flex items-center justify-center font-semibold;
 }
