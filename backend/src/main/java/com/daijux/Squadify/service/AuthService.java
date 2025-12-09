@@ -1,8 +1,12 @@
 package com.daijux.Squadify.service;
 
 import com.daijux.Squadify.dto.AuthResponse;
+import com.daijux.Squadify.dto.ChangePasswordRequest;
 import com.daijux.Squadify.dto.LoginRequest;
 import com.daijux.Squadify.dto.RegistrationRequest;
+import com.daijux.Squadify.repository.Match;
+import com.daijux.Squadify.repository.Profile;
+import com.daijux.Squadify.repository.Swipe;
 import com.daijux.Squadify.repository.User;
 import com.daijux.Squadify.security.JwtTokenProvider;
 import org.slf4j.Logger;
@@ -16,23 +20,32 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+
     private final User user;
+    private final Profile profile;
+    private final Match match;
+    private final Swipe swipe;
     private final ReactiveAuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 
     public AuthService(User user,
+                       Profile profile,
+                       Match match,
+                       Swipe swipe,
                        ReactiveAuthenticationManager authenticationManager,
                        JwtTokenProvider jwtTokenProvider,
                        PasswordEncoder passwordEncoder) {
         this.user = user;
+        this.profile = profile;
+        this.match = match;
+        this.swipe = swipe;
         this.authenticationManager = authenticationManager;
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
@@ -47,16 +60,11 @@ public class AuthService {
                     boolean isEmailUsed = tuple.getT1();
                     boolean isUsernameUsed = tuple.getT2();
 
-                    if (isEmailUsed || isUsernameUsed) {
-                        Map<String, String> errorDetails = new HashMap<>();
-                        if (isEmailUsed) {
-                            errorDetails.put("error", "email_exists");
-                            errorDetails.put("message", "Cet email est déjà utilisé.");
-                        } else {
-                            errorDetails.put("error", "username_exists");
-                            errorDetails.put("message", "Ce nom d'utilisateur est déjà pris.");
-                        }
-                        return Mono.just(errorDetails);
+                    if (isEmailUsed) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "Cet email est déjà utilisé."));
+                    }
+                    if (isUsernameUsed) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "Ce nom d'utilisateur est déjà pris."));
                     }
 
                     com.daijux.Squadify.model.User newUser = new com.daijux.Squadify.model.User();
@@ -66,10 +74,8 @@ public class AuthService {
 
                     return user.save(newUser)
                             .map(savedUser -> Map.of("message", "Inscription réussie."))
-                            .onErrorResume(e -> {
-                                log.error("Erreur lors de la sauvegarde de l'utilisateur {}: {}", request.getEmail(), e.getMessage());
-                                return Mono.just(Map.of("error", "save_failed", "message", "Erreur serveur lors de l'enregistrement du compte."));
-                            });
+                            .doOnError(e -> log.error("Erreur lors de l'enregistrement d'un utilisateur"))
+                            .onErrorResume(e -> Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur serveur lors de l'enregistrement du compte.")));
                 });
     }
 
@@ -81,15 +87,15 @@ public class AuthService {
 
         return authenticationManager.authenticate(auth)
                 .flatMap(authenticatedAuth -> {
-                    com.daijux.Squadify.model.User user = (com.daijux.Squadify.model.User) authenticatedAuth.getPrincipal();
-                    String token = jwtTokenProvider.generateToken(user);
+                    com.daijux.Squadify.model.User userModel = (com.daijux.Squadify.model.User) authenticatedAuth.getPrincipal();
+                    String token = jwtTokenProvider.generateToken(userModel);
 
                     return Mono.just(AuthResponse.builder()
                             .token(token)
-                            .userId(user.getId())
-                            .username(user.getUsername())
-                            .email(user.getEmail())
-                            .setupCompleted(user.isSetupCompleted())
+                            .userId(userModel.getId())
+                            .username(userModel.getUsername())
+                            .email(userModel.getEmail())
+                            .setupCompleted(userModel.isSetupCompleted())
                             .build());
                 })
                 .onErrorResume(e -> Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiants invalides")));
@@ -99,12 +105,40 @@ public class AuthService {
         if (!jwtTokenProvider.validateToken(token)) return Mono.empty();
         String userId = jwtTokenProvider.getUserIdFromToken(token);
         return user.findById(userId)
-                .map(user -> AuthResponse.builder()
-                        .userId(user.getId())
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .setupCompleted(user.isSetupCompleted())
+                .map(u -> AuthResponse.builder()
+                        .userId(u.getId())
+                        .username(u.getUsername())
+                        .email(u.getEmail())
+                        .setupCompleted(u.isSetupCompleted())
                         .build());
     }
 
+    public Mono<Void> changePassword(String userId, ChangePasswordRequest request) {
+        return user.findById(userId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable")))
+                .flatMap(u -> {
+                    if (!passwordEncoder.matches(request.getCurrentPassword(), u.getPassword())) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Mot de passe actuel incorrect"));
+                    }
+                    u.setPassword(passwordEncoder.encode(request.getNewPassword()));
+                    return user.save(u);
+                })
+                .then();
+    }
+
+    public Mono<Void> deleteAccount(String userId, String password) {
+        return user.findById(userId)
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable")))
+                .flatMap(u -> {
+                    if (!passwordEncoder.matches(password, u.getPassword())) {
+                        return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect"));
+                    }
+
+                    return profile.deleteByUserId(userId)
+                            .then(match.deleteByUser1IdOrUser2Id(userId, userId))
+                            .then(swipe.deleteBySwiperIdOrTargetId(userId, userId))
+                            .then(user.deleteById(userId))
+                            .doOnError(e -> log.error("Erreur lors de la suppression du compte"));
+                });
+    }
 }

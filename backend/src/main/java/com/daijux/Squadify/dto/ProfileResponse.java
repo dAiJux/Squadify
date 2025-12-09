@@ -13,6 +13,7 @@ import java.util.List;
 public class ProfileResponse {
     private String userId;
     private String username;
+    private String email;
     private List<String> games;
     private List<String> schedules;
     private String playStyle;

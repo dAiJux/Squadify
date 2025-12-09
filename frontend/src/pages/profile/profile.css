@@ -5,71 +5,71 @@
 }
 
 .profile-card {
-  @apply relative w-full max-w-4xl bg-slate-900/70 backdrop-blur-lg rounded-2xl border border-blue-500/30 p-6 shadow-2xl;
+  @apply relative w-full max-w-4xl bg-slate-900/70 backdrop-blur-lg rounded-2xl border border-blue-500/30 p-5 md:p-8 shadow-2xl;
 }
 
 .profile-top {
-  @apply flex items-center gap-6 mb-6;
+  @apply flex items-center gap-4 flex-nowrap pr-14;
 }
 
 .profile-avatar-large {
-  @apply w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center text-blue-300 text-2xl font-bold border-2 border-violet-500/30;
+  @apply w-20 h-20 min-w-[5rem] rounded-full bg-slate-800 flex items-center justify-center text-blue-300 text-2xl font-bold border-2 border-violet-500/30;
 }
 
 .profile-meta {
-  @apply flex-1;
+  @apply flex-1 min-w-0;
 }
 
 .profile-title {
-  @apply text-3xl font-extrabold text-blue-400;
+  @apply text-3xl font-extrabold text-blue-400 truncate;
 }
 
 .profile-sub {
-  @apply text-sm text-gray-400 mt-1;
+  @apply text-sm text-gray-400 mt-1 truncate;
 }
 
 .profile-actions-top {
-  @apply ml-4;
+  @apply absolute top-5 right-5 z-40 flex items-center md:top-8 md:right-8;
 }
 
-.logout-btn {
-  @apply px-5 py-2 rounded-md text-sm font-semibold uppercase tracking-wider bg-red-600 text-white border border-red-500 transition-all duration-300 ease-in-out cursor-pointer;
-  box-shadow: 0 0 5px theme(colors.red.500),
-              0 0 10px theme(colors.red.900);
+.logout-icon {
+  @apply w-10 h-10 flex items-center justify-center rounded-full cursor-pointer text-white transition-transform border-2 border-white/[0.06];
+  background: linear-gradient(90deg, #ef4444, #ef4444);
+  box-shadow: 0 6px 18px rgba(220,38,38,0.18), inset 0 -4px 10px rgba(255,120,120,0.06);
 }
 
-.logout-btn:hover {
-  @apply bg-red-500;
-  box-shadow: 0 0 10px theme(colors.red.400),
-              0 0 20px theme(colors.red.600),
-              0 0 30px theme(colors.red.800);
+.logout-icon:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(220,38,38,0.25), inset 0 0 18px rgba(255,120,120,0.08);
+  filter: brightness(1.05);
 }
 
 .tabs {
-  @apply flex gap-2 mt-2;
+  @apply flex gap-2 mt-6;
 }
 
 .tab {
-  @apply px-3 py-2 rounded-md text-sm text-gray-300 bg-transparent border border-transparent cursor-pointer;
+  @apply px-3 py-2 rounded-md text-sm text-gray-300 bg-transparent border border-transparent cursor-pointer transition-colors hover:text-white hover:bg-slate-800/40;
 }
 
 .tab.active {
-  @apply bg-slate-800/60 text-white border border-blue-500/30;
+  @apply bg-slate-800/80 text-white border border-blue-500/30 shadow-sm;
 }
 
 .card-section {
-  @apply mt-6 pt-4 border-t border-gray-800/40;
+  @apply mt-6 pt-6 border-t border-gray-800/50;
+}
+
+.delete-section {
+  @apply mt-4;
 }
 
 .section-title-inline {
-  @apply text-violet-400 text-sm uppercase tracking-widest font-bold inline-flex items-center gap-2;
-  margin: 0;
+  @apply text-violet-400 text-sm uppercase tracking-widest font-bold inline-flex items-center gap-2 m-0;
 }
 
 .icon-edit-inline {
-  @apply text-gray-300 bg-transparent px-1 py-0.5 rounded-md;
-  border: none;
-  cursor: pointer;
+  @apply text-gray-300 bg-transparent px-1 py-0.5 rounded-md border-none cursor-pointer;
   transition: background-color 120ms ease, box-shadow 120ms ease;
 }
 
@@ -83,15 +83,15 @@
 }
 
 .row {
-  @apply flex items-center gap-4 mt-2;
+  @apply flex items-center gap-4 mt-3;
 }
 
 .label {
-  @apply w-36 text-sm text-gray-400;
+  @apply w-36 text-sm text-gray-400 shrink-0;
 }
 
 .value {
-  @apply text-gray-200;
+  @apply text-gray-200 truncate;
 }
 
 .chips {
@@ -99,7 +99,7 @@
 }
 
 .chip {
-  @apply bg-slate-800/60 text-gray-300 py-1 px-3 rounded-lg text-sm;
+  @apply bg-slate-800/60 text-gray-300 py-1 px-3 rounded-lg text-sm border border-white/5;
 }
 
 .edit-block {
@@ -115,7 +115,7 @@
 }
 
 .form-row input {
-  @apply bg-slate-800/60 border border-gray-700/40 rounded-md p-2 text-gray-200;
+  @apply bg-slate-800/60 border border-gray-700/60 rounded-md p-2 text-gray-200 outline-none focus:border-blue-500/50 transition-colors;
 }
 
 .options-grid {
@@ -123,77 +123,141 @@
 }
 
 .options-grid.single-row {
-  @apply flex-nowrap overflow-auto;
+  @apply flex-nowrap overflow-x-auto pb-2;
 }
 
 .option-card {
-  @apply bg-slate-800/60 text-gray-300 py-1 px-3 rounded-md cursor-pointer transition-all duration-150 border border-gray-700;
-  font-size: 0.95rem;
-}
-
-.option-card:hover {
-  @apply bg-slate-700;
+  @apply bg-slate-800/40 text-gray-300 py-1.5 px-3 rounded-md cursor-pointer transition-all duration-150 border border-gray-700/50 text-[0.9rem] hover:bg-slate-700/60 hover:border-gray-600;
 }
 
 .option-card.selected {
-  @apply bg-blue-900/40 text-blue-200 border-blue-400 shadow-md font-semibold;
+  @apply bg-blue-900/40 text-blue-200 border-blue-400 font-semibold;
+  box-shadow: 0 0 10px rgba(59,130,246,0.15);
 }
 
 .section-controls {
   @apply mt-6 flex gap-3 items-center;
 }
 
+.security-controls-default {
+  @apply justify-start;
+}
+
+.security-controls-editing {
+  @apply justify-start;
+}
+
+.delete-controls {
+  @apply justify-start;
+}
+
 .btn-small {
-  @apply text-sm px-4 py-2 rounded-md;
+  @apply flex justify-center items-center text-sm px-4 py-2 rounded-md transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
 }
 
 .btn-small.btnPrimary {
-  @apply text-sm px-5 py-2 rounded-md;
+  @apply text-sm px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-lg shadow-blue-900/20;
 }
 
-.btn-small:hover {
-  @apply opacity-95;
+.btn-small.btnSecondary {
+  @apply text-sm px-5 py-2 rounded-md bg-transparent border border-gray-700 text-gray-300 hover:bg-gray-800/50 shadow-md shadow-black/10 hover:shadow-lg hover:shadow-black/20;
 }
 
 .delete-btn {
-  @apply inline-flex items-center gap-2 px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wider bg-transparent text-red-400 border border-red-500 transition-all duration-300 ease-in-out cursor-pointer;
-  box-shadow: 0 0 5px theme(colors.red.900),
-              inset 0 0 5px theme(colors.red.900);
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wider bg-transparent text-red-400 border border-red-500/50 transition-all duration-300 ease-in-out cursor-pointer;
+  box-shadow: 0 0 5px rgba(139, 0, 0, 0.2), inset 0 0 5px rgba(139, 0, 0, 0.1);
 }
 
 .delete-btn:hover {
-  @apply bg-red-900/40 text-red-300;
-  box-shadow: 0 0 10px theme(colors.red.600),
-              inset 0 0 10px theme(colors.red.600);
+  @apply bg-red-950/30 text-red-300 border-red-500;
+  box-shadow: 0 0 15px rgba(220, 38, 38, 0.15), inset 0 0 10px rgba(220, 38, 38, 0.1);
+}
+
+.delete-btn-confirm {
+  @apply bg-red-900/40 border-red-500 text-red-300 hover:bg-red-900/60;
 }
 
 .security-block {
   @apply mt-2;
 }
 
-.security-row {
-  @apply flex items-center justify-between gap-4;
-}
-
-.security-title {
-  @apply text-sm font-semibold text-gray-200;
-}
-
 .notice {
-  @apply mt-6 text-sm text-green-300;
+  @apply mt-6 text-sm text-green-400 bg-green-900/20 px-4 py-2 rounded border border-green-500/20;
 }
 
 .muted {
-  @apply text-gray-400;
+  @apply text-gray-400 text-sm;
+}
+
+.modal-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm px-4;
+}
+
+.modal-card {
+  @apply w-full max-w-md bg-slate-900 border border-blue-500/30 rounded-xl p-8 shadow-2xl relative text-center;
+  animation: modalPop 0.2s ease-out;
+}
+
+.modal-card-delete {
+  @apply border-red-500/50;
+}
+
+.delete-modal-header {
+  @apply flex items-center gap-2 mb-4 text-red-400 justify-center;
+}
+
+.modal-title {
+  @apply text-2xl font-bold text-white mb-4;
+}
+
+.modal-text {
+  @apply text-gray-300 text-base mb-8 leading-relaxed;
+}
+
+.modal-form-row {
+  @apply mb-6;
+}
+
+.modal-label-input {
+  @apply text-gray-400 text-sm font-medium;
+}
+
+.modal-input-password {
+  @apply w-full bg-slate-800/60 border border-gray-700/60 rounded-md p-2 text-gray-200 outline-none focus:border-blue-500/50 transition-colors;
+}
+
+.modal-error-message {
+  @apply text-red-400 text-xs mt-1;
+}
+
+.modal-actions {
+  @apply flex justify-center gap-4 mt-6;
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 @media (max-width: 640px) {
   .profile-top {
-    @apply flex-col items-start;
+    @apply gap-3;
   }
 
-  .logout-btn {
-    @apply px-4 py-2 text-sm;
+  .profile-avatar-large {
+    @apply w-16 h-16 min-w-[4rem];
+  }
+
+  .profile-title {
+    @apply text-xl;
+  }
+
+  .profile-sub {
+    @apply text-sm;
+  }
+
+  .logout-icon {
+    @apply w-9 h-9;
   }
 
   .label {
@@ -208,7 +272,24 @@
     @apply flex-wrap gap-2;
   }
 
+  .tab {
+     @apply flex-1 text-center;
+  }
+
   .section-controls {
-    @apply flex-col items-start;
+    @apply flex-col items-center justify-center gap-3;
+  }
+
+  .section-controls button,
+  .delete-btn {
+     @apply w-auto min-w-[140px] justify-center;
+  }
+
+  .modal-actions {
+    @apply flex-col-reverse gap-3;
+  }
+
+  .modal-actions button {
+    @apply w-full justify-center;
   }
 }

@@ -37,7 +37,7 @@
 }
 
 .modal-form-container {
-  @apply p-8 sm:p-10;
+  @apply p-8 sm:p-9;
 }
 
 .modal-form {

@@ -5,7 +5,7 @@ import { RootState } from '../../store/store';
 import { setProfileData } from '../../store/profile';
 import { setUserData, clearUserData } from '../../store/user';
 import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '../../data/gameOptions';
-import { Edit3, Trash2 } from 'lucide-react';
+import { Edit3, Trash2, LogOut, AlertTriangle } from 'lucide-react';
 import './profile.css';
 
 const mapIdsToLabels = (ids: string[] = [], list: { id: string; label: string }[]) =>
@@ -47,6 +47,12 @@ const Profile: React.FC = () => {
   const [pwdState, setPwdState] = useState({ current: '', next: '', confirm: '' });
   const [pwdLoading, setPwdLoading] = useState(false);
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const [activeTab, setActiveTab] = useState<'information' | 'preferences' | 'securite'>('information');
 
   useEffect(() => {
@@ -84,7 +90,11 @@ const Profile: React.FC = () => {
     setEmail(user?.email ?? '');
   }, [profile, user, dispatch, token]);
 
-  const handleLogout = async () => {
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     } catch {}
@@ -200,25 +210,46 @@ const Profile: React.FC = () => {
     }
   };
 
-  const deleteAccount = async () => {
+  const handleDeleteClick = () => {
+    setDeleteError(null);
+    setDeletePassword('');
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteAccount = async () => {
     if (!user?.userId) return;
-    if (!confirm('Supprimer définitivement votre compte ? Cette action est irréversible.')) return;
+    if (!deletePassword) {
+      setDeleteError('Veuillez entrer votre mot de passe.');
+      return;
+    }
+    setDeleteLoading(true);
+    setDeleteError(null);
+
     try {
       const res = await fetch('/api/auth/delete-account', {
         method: 'DELETE',
         credentials: 'include',
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({ password: deletePassword })
       });
+
       if (res.ok) {
         dispatch(clearUserData());
         localStorage.removeItem('squadify_token');
         localStorage.removeItem('squadify_user_data');
         navigate('/');
+      } else if (res.status === 401) {
+        setDeleteError('Mot de passe incorrect.');
       } else {
-        setNotice('Impossible de supprimer le compte.');
+        setDeleteError('Impossible de supprimer le compte. Réessayez plus tard.');
       }
     } catch {
-      setNotice('Erreur réseau.');
+      setDeleteError('Erreur réseau.');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -230,22 +261,22 @@ const Profile: React.FC = () => {
     <div className="profile-page">
       <div className="profile-card">
         <div className="profile-top">
-          <div className="profile-avatar-large">{user?.username?.charAt(0).toUpperCase() ?? 'J'}</div>
+          <div className="profile-avatar-large" aria-hidden>{user?.username?.charAt(0).toUpperCase() ?? 'J'}</div>
           <div className="profile-meta">
             <h1 className="profile-title">{user?.username ?? 'Joueur'}</h1>
             <p className="profile-sub">{user?.email ?? ''}</p>
           </div>
           <div className="profile-actions-top">
-            <button className="logout-btn" onClick={handleLogout}>Déconnexion</button>
+            <button className="logout-icon" onClick={handleLogoutClick} aria-label="Déconnexion">
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
-
         <div className="tabs">
           <button className={`tab ${activeTab === 'information' ? 'active' : ''}`} onClick={() => setActiveTab('information')} aria-selected={activeTab === 'information'}>Informations</button>
           <button className={`tab ${activeTab === 'preferences' ? 'active' : ''}`} onClick={() => setActiveTab('preferences')} aria-selected={activeTab === 'preferences'}>Préférences</button>
           <button className={`tab ${activeTab === 'securite' ? 'active' : ''}`} onClick={() => setActiveTab('securite')} aria-selected={activeTab === 'securite'}>Sécurité</button>
         </div>
-
         {activeTab === 'information' && (
           <div className="card-section">
             <h2 className="section-title-inline">Informations <button aria-label="Modifier informations du compte" className="icon-edit-inline" onClick={() => { if (editing.account) resetSection('account'); else setEditing(prev => ({ ...prev, account: true })); }}><Edit3 size={14} /></button></h2>
@@ -260,7 +291,7 @@ const Profile: React.FC = () => {
                   <input value={email} onChange={e => setEmail(e.target.value)} />
                 </div>
                 <div className="section-controls">
-                  <button className="btn btnPrimary btn-small" onClick={() => saveProfilePartial({ account: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                  <button className="btn-small btnPrimary" onClick={() => saveProfilePartial({ account: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
                 </div>
               </div>
             ) : (
@@ -271,7 +302,6 @@ const Profile: React.FC = () => {
             )}
           </div>
         )}
-
         {activeTab === 'preferences' && (
           <>
             <div className="card-section">
@@ -286,16 +316,18 @@ const Profile: React.FC = () => {
                     </div>
                   </div>
                   <div className="section-controls">
-                    <button className="btn btnPrimary btn-small" onClick={() => saveProfilePartial({ games: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                    <button className="btn-small btnPrimary" onClick={() => saveProfilePartial({ games: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
                   </div>
                 </div>
               ) : (
                 <div className="read-block">
-                  <div className="row"><div className="chips">{gamesLabels.map((g, i) => <span key={i} className="chip">{g}</span>)}</div></div>
+                  <div className="row">
+                    <span className="label">Sélection</span>
+                    <div className="chips">{gamesLabels.map((g, i) => <span key={i} className="chip">{g}</span>)}</div>
+                  </div>
                 </div>
               )}
             </div>
-
             <div className="card-section">
               <h2 className="section-title-inline">Disponibilités <button aria-label="Modifier disponibilités" className="icon-edit-inline" onClick={() => { if (editing.schedules) resetSection('schedules'); else setEditing(prev => ({ ...prev, schedules: true })); }}><Edit3 size={14} /></button></h2>
               {editing.schedules ? (
@@ -308,16 +340,18 @@ const Profile: React.FC = () => {
                     </div>
                   </div>
                   <div className="section-controls">
-                    <button className="btn btnPrimary btn-small" onClick={() => saveProfilePartial({ schedules: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                    <button className="btn-small btnPrimary" onClick={() => saveProfilePartial({ schedules: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
                   </div>
                 </div>
               ) : (
                 <div className="read-block">
-                  <div className="row"><div className="chips">{schedulesLabels.map((s, i) => <span key={i} className="chip">{s}</span>)}</div></div>
+                  <div className="row">
+                    <span className="label">Jours/Heures</span>
+                    <div className="chips">{schedulesLabels.map((s, i) => <span key={i} className="chip">{s}</span>)}</div>
+                  </div>
                 </div>
               )}
             </div>
-
             <div className="card-section">
               <h2 className="section-title-inline">Style de jeu <button aria-label="Modifier style de jeu" className="icon-edit-inline" onClick={() => { if (editing.style) resetSection('style'); else setEditing(prev => ({ ...prev, style: true })); }}><Edit3 size={14} /></button></h2>
               {editing.style ? (
@@ -330,22 +364,24 @@ const Profile: React.FC = () => {
                     </div>
                   </div>
                   <div className="section-controls">
-                    <button className="btn btnPrimary btn-small" onClick={() => saveProfilePartial({ style: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+                    <button className="btn-small btnPrimary" onClick={() => saveProfilePartial({ style: true })} disabled={saving}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
                   </div>
                 </div>
               ) : (
                 <div className="read-block">
-                  <div className="row"><span className="value">{playStyleLabel}</span></div>
+                  <div className="row">
+                    <span className="label">Style</span>
+                    <span className="value">{playStyleLabel}</span>
+                  </div>
                 </div>
               )}
             </div>
           </>
         )}
-
         {activeTab === 'securite' && (
           <>
             <div className="card-section">
-              <h2 className="section-title-inline">Changer le mot de passe</h2>
+              <h2 className="section-title-inline">Mot de passe</h2>
               <div className="security-block">
                 <p className="muted">Vous pouvez mettre à jour votre mot de passe ci-dessous.</p>
                 {editing.security ? (
@@ -362,32 +398,74 @@ const Profile: React.FC = () => {
                       <label>Confirmer</label>
                       <input type="password" value={pwdState.confirm} onChange={e => setPwdState(prev => ({ ...prev, confirm: e.target.value }))} />
                     </div>
-                    <div className="section-controls mt-3">
-                      <button className="btn btnPrimary btn-small" onClick={changePassword} disabled={pwdLoading}>{pwdLoading ? 'Modification...' : 'Valider'}</button>
-                      <button className="btn btn-small" onClick={() => resetSection('security')}>Annuler</button>
+                    <div className="section-controls security-controls-editing">
+                      <button className="btn-small btnPrimary" onClick={changePassword} disabled={pwdLoading}>{pwdLoading ? 'Modification...' : 'Valider'}</button>
+                      <button className="btn-small btnSecondary" onClick={() => resetSection('security')}>Annuler</button>
                     </div>
                   </div>
                 ) : (
-                  <div className="section-controls mt-3">
-                    <button className="btn btnPrimary btn-small" onClick={() => setEditing(prev => ({ ...prev, security: true }))}>Modifier le mot de passe</button>
+                  <div className="section-controls security-controls-default">
+                    <button className="btn-small btnPrimary" onClick={() => setEditing(prev => ({ ...prev, security: true }))}>Modifier le mot de passe</button>
                   </div>
                 )}
               </div>
             </div>
-            <div className="card-section mt-4">
+            <div className="card-section delete-section">
               <h2 className="section-title-inline">Suppression du compte</h2>
               <div className="security-block">
-                  <p className="muted">La suppression est irréversible : toutes vos données seront effacées.</p>
-                  <div className="section-controls mt-3">
-                    <button className="delete-btn" onClick={deleteAccount}><Trash2 size={14} />&nbsp;Supprimer mon compte</button>
-                  </div>
+                <p className="muted">La suppression est irréversible : toutes vos données seront effacées.</p>
+                <div className="section-controls delete-controls">
+                  <button className="delete-btn" onClick={handleDeleteClick}><Trash2 size={14} />&nbsp;Supprimer mon compte</button>
+                </div>
               </div>
             </div>
           </>
         )}
-
         {notice && <div className="notice">{notice}</div>}
       </div>
+      {showLogoutModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3 className="modal-title">Déconnexion</h3>
+            <p className="modal-text">Êtes-vous sûr de vouloir vous déconnecter ?</p>
+            <div className="modal-actions">
+              <button className="btn-small btnSecondary" onClick={() => setShowLogoutModal(false)}>Annuler</button>
+              <button className="btn-small btnPrimary" onClick={confirmLogout}>Se déconnecter</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-card modal-card-delete">
+            <div className="delete-modal-header">
+              <AlertTriangle size={24} />
+              <h3 className="modal-title">Supprimer le compte</h3>
+            </div>
+            <p className="modal-text">
+              Cette action est <strong className="text-red-400">irréversible</strong>. Tous vos matchs, messages et préférences seront définitivement effacés.
+            </p>
+            <div className="form-row modal-form-row">
+              <label className="modal-label-input">Pour confirmer, entrez votre mot de passe :</label>
+              <input
+                type="password"
+                value={deletePassword}
+                onChange={e => setDeletePassword(e.target.value)}
+                placeholder="Votre mot de passe"
+                className="modal-input-password"
+                autoFocus
+              />
+              {deleteError && <span className="modal-error-message">{deleteError}</span>}
+            </div>
+            <div className="modal-actions">
+              <button className="btn-small btnSecondary" onClick={() => setShowDeleteModal(false)} disabled={deleteLoading}>Annuler</button>
+              <button className="delete-btn delete-btn-confirm" onClick={confirmDeleteAccount} disabled={deleteLoading}>
+                {deleteLoading ? 'Suppression...' : 'Confirmer la suppression'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

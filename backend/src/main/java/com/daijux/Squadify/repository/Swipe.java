@@ -6,4 +6,5 @@ import reactor.core.publisher.Mono;
 
 public interface Swipe extends ReactiveMongoRepository<com.daijux.Squadify.model.Swipe, String> {
     Mono<com.daijux.Squadify.model.Swipe> findBySwiperIdAndTargetIdAndType(String swiperId, String targetId, SwipeEvent.SwipeType type);
+    Mono<Void> deleteBySwiperIdOrTargetId(String swiperId, String targetId);
 }

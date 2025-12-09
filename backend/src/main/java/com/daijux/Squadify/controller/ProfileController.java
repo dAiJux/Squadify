@@ -1,8 +1,12 @@
 package com.daijux.Squadify.controller;
 
 import com.daijux.Squadify.dto.ProfileRequest;
+import com.daijux.Squadify.dto.ProfileResponse;
+import com.daijux.Squadify.model.User;
 import com.daijux.Squadify.service.ProfileService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -23,9 +27,24 @@ public class ProfileController {
     }
 
     @GetMapping("/{userId}")
-    public Mono<ResponseEntity<com.daijux.Squadify.model.Profile>> getProfile(@PathVariable String userId) {
+    public Mono<ResponseEntity<ProfileResponse>> getProfile(@PathVariable String userId) {
         return profileService.getProfileByUserId(userId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{userId}")
+    public Mono<ResponseEntity<ProfileResponse>> updateProfile(
+            @PathVariable String userId,
+            @RequestBody ProfileRequest request,
+            @AuthenticationPrincipal User user) {
+
+        if (!user.getId().equals(userId)) {
+            return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
+        }
+
+        return profileService.updateFullProfile(userId, request)
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).build()));
     }
 }
