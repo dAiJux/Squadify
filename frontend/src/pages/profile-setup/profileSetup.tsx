@@ -50,14 +50,6 @@ const ProfileSetup: React.FC = () => {
       if (response.ok) {
         dispatch(completeSetup());
         dispatch(setProfileData(profileData));
-
-        const storedDataStr = localStorage.getItem('squadify_user_data');
-        if (storedDataStr) {
-          const storedData = JSON.parse(storedDataStr);
-          storedData.setupCompleted = true;
-          localStorage.setItem('squadify_user_data', JSON.stringify(storedData));
-        }
-
         navigate('/matchmaking');
       } else {
         console.error("Erreur lors de la sauvegarde du profil");

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Provider } from 'react-redux';
+import { Provider, useDispatch } from 'react-redux';
 import { store } from './store/store.ts';
+import { setUserData } from './store/user.ts';
+import { setProfileData } from './store/profile.ts';
 import './index.css';
 import Home from './pages/home/home.tsx';
 import ProfileSetup from './pages/profile-setup/profileSetup.tsx';
@@ -12,13 +14,59 @@ import NotFound from './pages/not-found/notFound.tsx';
 import AuthGuard from './guards/authGuard.tsx';
 import Header from './components/header/header.tsx';
 
-const rootElement = document.getElementById('app');
+const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const dispatch = useDispatch();
+  const [isInitialized, setIsInitialized] = useState(false);
 
-if (rootElement) {
-  ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
-      <Provider store={store}>
-        <BrowserRouter>
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const res = await fetch('/api/auth/me', { credentials: 'include' });
+        if (res.ok) {
+          const data = await res.json();
+          dispatch(setUserData(data));
+
+          if (data.setupCompleted && data.userId) {
+            const profileRes = await fetch(`/api/profiles/${data.userId}`, {
+              credentials: 'include'
+            });
+            if (profileRes.ok) {
+              const profileData = await profileRes.json();
+              dispatch(setProfileData(profileData));
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+
+    initAuth();
+  }, [dispatch]);
+
+  if (!isInitialized) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh'
+      }}>
+        <div>Chargement...</div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
+};
+
+const App = () => {
+  return (
+    <Provider store={store}>
+      <BrowserRouter>
+        <AppInitializer>
           <Header />
           <Routes>
             <Route path="/" element={<Home />} />
@@ -48,8 +96,18 @@ if (rootElement) {
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </Provider>
+        </AppInitializer>
+      </BrowserRouter>
+    </Provider>
+  );
+};
+
+const rootElement = document.getElementById('app');
+
+if (rootElement) {
+  ReactDOM.createRoot(rootElement).render(
+    <React.StrictMode>
+      <App />
     </React.StrictMode>
   );
 } else {

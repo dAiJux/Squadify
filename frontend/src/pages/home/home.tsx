@@ -1,65 +1,42 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
-import { setUserData } from '../../store/user';
 import './home.css';
 import Auth from '../../components/auth/auth.tsx';
 
 const Home = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const setupCompleted = useSelector((state: RootState) => state.user.data?.setupCompleted);
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTab, setModalTab] = useState<'login' | 'register'>('login');
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [modalTab, setModalTab] = React.useState<'login' | 'register'>('login');
 
   useEffect(() => {
     if (isAuthenticated) {
-      if (setupCompleted) navigate('/matchmaking');
-      else navigate('/setup');
-      return;
-    }
-
-    const checkAuth = async () => {
-      const token = localStorage.getItem('squadify_token');
-      if (!token) {
-        setIsLoading(false);
-        return;
+      if (setupCompleted) {
+        navigate('/matchmaking');
+      } else {
+        navigate('/setup');
       }
+    }
+  }, [isAuthenticated, setupCompleted, navigate]);
 
-      try {
-        const res = await fetch('/api/auth/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+  const handleLogin = () => {
+    setModalTab('login');
+    setIsModalOpen(true);
+  };
 
-        if (res.ok) {
-          const data = await res.json();
-          dispatch(setUserData({ token, ...data }));
-          if (data.setupCompleted) navigate('/matchmaking');
-          else navigate('/setup');
-        }
-      } catch {}
-      finally { setIsLoading(false); }
-    };
+  const handleRegister = () => {
+    setModalTab('register');
+    setIsModalOpen(true);
+  };
 
-    checkAuth();
-  }, [isAuthenticated, setupCompleted, navigate, dispatch]);
-
-  const handleLogin = () => { setModalTab('login'); setIsModalOpen(true); };
-  const handleRegister = () => { setModalTab('register'); setIsModalOpen(true); };
-  const handleCloseModal = () => { setIsModalOpen(false); };
-
-  if (isLoading) {
-    return (
-      <div className="home-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <p>Chargement...</p>
-      </div>
-    );
-  }
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="home-container">

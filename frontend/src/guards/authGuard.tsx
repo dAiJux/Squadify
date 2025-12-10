@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/store';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -9,48 +11,37 @@ interface AuthGuardProps {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children, requireSetup = true }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [setupCompleted, setSetupCompleted] = useState(false);
+
+  const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
+  const setupCompleted = useSelector((state: RootState) => state.user.data?.setupCompleted ?? false);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await fetch('/api/auth/me', { credentials: 'include' });
-        if (res.ok) {
-          const data = await res.json();
-          setIsAuthenticated(true);
-          setSetupCompleted(data.setupCompleted);
-        } else {
-          setIsAuthenticated(false);
-        }
-      } catch {
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkAuth();
-  }, []);
-
-  useEffect(() => {
-    if (!loading) {
-      if (!isAuthenticated) {
-        navigate('/');
-        return;
-      }
-      if (requireSetup && !setupCompleted && location.pathname !== '/setup') {
-        navigate('/setup');
-      }
-      if (location.pathname === '/setup' && setupCompleted) {
-        navigate('/matchmaking');
-      }
+    if (!isAuthenticated) {
+      navigate('/');
+      return;
     }
-  }, [loading, isAuthenticated, setupCompleted, requireSetup, navigate, location]);
 
-  if (loading || !isAuthenticated) return null;
-  if (requireSetup && !setupCompleted) return null;
-  if (location.pathname === '/setup' && setupCompleted) return null;
+    if (requireSetup && !setupCompleted && location.pathname !== '/setup') {
+      navigate('/setup');
+      return;
+    }
+
+    if (location.pathname === '/setup' && setupCompleted) {
+      navigate('/matchmaking');
+    }
+  }, [isAuthenticated, setupCompleted, requireSetup, navigate, location.pathname]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  if (requireSetup && !setupCompleted) {
+    return null;
+  }
+
+  if (location.pathname === '/setup' && setupCompleted) {
+    return null;
+  }
 
   return <>{children}</>;
 };

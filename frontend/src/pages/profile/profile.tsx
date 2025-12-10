@@ -20,7 +20,6 @@ const Profile: React.FC = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((s: RootState) => s.user.data);
-  const token = useSelector((s: RootState) => s.user.token);
   const profile = useSelector((s: RootState) => s.profile.data);
 
   const savedProfileRef = useRef<any>(null);
@@ -61,8 +60,7 @@ const Profile: React.FC = () => {
         setLoading(true);
         try {
           const res = await fetch(`/api/profiles/${user.userId}`, {
-            credentials: 'include',
-            headers: token ? { Authorization: `Bearer ${token}` } : undefined
+            credentials: 'include'
           });
           if (res.ok) {
             const data = await res.json();
@@ -88,7 +86,7 @@ const Profile: React.FC = () => {
     }
     setUsername(user?.username ?? '');
     setEmail(user?.email ?? '');
-  }, [profile, user, dispatch, token]);
+  }, [profile, user, dispatch]);
 
   const handleLogoutClick = () => {
     setShowLogoutModal(true);
@@ -99,8 +97,6 @@ const Profile: React.FC = () => {
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     } catch {}
     dispatch(clearUserData());
-    localStorage.removeItem('squadify_token');
-    localStorage.removeItem('squadify_user_data');
     navigate('/');
   };
 
@@ -142,25 +138,19 @@ const Profile: React.FC = () => {
         method: 'PUT',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
       });
       if (res.ok) {
         const saved = await res.json();
         dispatch(setProfileData(saved));
-        dispatch(setUserData({ token: token ?? '', userId: user.userId, username: saved.username ?? username, email: saved.email ?? email, setupCompleted: true }));
-        const stored = localStorage.getItem('squadify_user_data');
-        if (stored) {
-          try {
-            const parsed = JSON.parse(stored);
-            parsed.username = saved.username ?? username;
-            parsed.email = saved.email ?? email;
-            parsed.setupCompleted = true;
-            localStorage.setItem('squadify_user_data', JSON.stringify(parsed));
-          } catch {}
-        }
+        dispatch(setUserData({
+          userId: user.userId,
+          username: saved.username ?? username,
+          email: saved.email ?? email,
+          setupCompleted: true
+        }));
         savedProfileRef.current = saved;
         setNotice('Sauvegarde effectuée.');
         Object.keys(opts).forEach(k => {
@@ -189,8 +179,7 @@ const Profile: React.FC = () => {
         method: 'POST',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ currentPassword: pwdState.current, newPassword: pwdState.next })
       });
@@ -230,16 +219,13 @@ const Profile: React.FC = () => {
         method: 'DELETE',
         credentials: 'include',
         headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {})
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ password: deletePassword })
       });
 
       if (res.ok) {
         dispatch(clearUserData());
-        localStorage.removeItem('squadify_token');
-        localStorage.removeItem('squadify_user_data');
         navigate('/');
       } else if (res.status === 401) {
         setDeleteError('Mot de passe incorrect.');
@@ -322,7 +308,6 @@ const Profile: React.FC = () => {
               ) : (
                 <div className="read-block">
                   <div className="row">
-                    <span className="label">Sélection</span>
                     <div className="chips">{gamesLabels.map((g, i) => <span key={i} className="chip">{g}</span>)}</div>
                   </div>
                 </div>
@@ -346,7 +331,6 @@ const Profile: React.FC = () => {
               ) : (
                 <div className="read-block">
                   <div className="row">
-                    <span className="label">Jours/Heures</span>
                     <div className="chips">{schedulesLabels.map((s, i) => <span key={i} className="chip">{s}</span>)}</div>
                   </div>
                 </div>
@@ -370,7 +354,6 @@ const Profile: React.FC = () => {
               ) : (
                 <div className="read-block">
                   <div className="row">
-                    <span className="label">Style</span>
                     <span className="value">{playStyleLabel}</span>
                   </div>
                 </div>
