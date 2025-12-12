@@ -1,12 +1,54 @@
 @import "tailwindcss";
 
+@keyframes slideOutLeft {
+  0% { transform: translateX(0) rotate(0); opacity: 1; }
+  100% { transform: translateX(-150%) rotate(-20deg); opacity: 0; }
+}
+
+@keyframes slideOutRight {
+  0% { transform: translateX(0) rotate(0); opacity: 1; }
+  100% { transform: translateX(150%) rotate(20deg); opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.swipe-exit-left {
+  animation: slideOutLeft 0.4s forwards ease-in-out;
+}
+
+.swipe-exit-right {
+  animation: slideOutRight 0.4s forwards ease-in-out;
+}
+
+.anim-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.match-popup-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.match-popup-content {
+  @apply bg-slate-800 border border-teal-500/50 rounded-2xl p-8 max-w-md w-full text-center shadow-2xl;
+  animation: zoomIn 0.3s ease-out forwards;
+}
+
 .home-container {
   @apply font-sans flex flex-col items-center mt-4 w-full bg-slate-900 text-gray-200 relative p-6;
   overflow: hidden;
 }
 
 .match-wrapper {
-  @apply w-full max-w-3xl flex items-center justify-center;
+  @apply w-full max-w-xl mx-auto;
   max-height: calc(100vh - 9rem);
 }
 

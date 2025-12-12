@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom';
 import { X, Gamepad2, Clock, Swords, User } from 'lucide-react';
 import './profileCard.css';
 import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '../../data/gameOptions';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../store/store';
 
 interface ProfileResponse {
   userId: string;
@@ -33,13 +35,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ candidate }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
-
   const [isOpen, setIsOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
-
-  const { username, games, schedules, playStyle } = candidate;
-  const gamesLabels = mapIdsToLabels(games, GAMES_LIST);
+  const userGames = useSelector((state: RootState) => state.profile.data?.games ?? []);
+  const { username, games = [], schedules, playStyle } = candidate;
+  const commonGameIds = games.filter(g => userGames.includes(g));
+  const gamesCommonLabels = mapIdsToLabels(commonGameIds, GAMES_LIST);
   const schedulesLabels = mapIdsToLabels(schedules, SCHEDULES_LIST);
   const playStyleLabel = mapToLabel(playStyle, PLAYSTYLES_LIST) ?? 'Non défini';
 
@@ -52,28 +54,28 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ candidate }) => {
   }, [isOpen]);
 
   useLayoutEffect(() => {
-      if (isOpen && contentRef.current && cardRef.current) {
-        const mobileRect = cardRef.current.getBoundingClientRect();
-        const targetRect = contentRef.current.getBoundingClientRect();
-        const scaleX = mobileRect.width / targetRect.width;
-        const scaleY = mobileRect.height / targetRect.height;
-        const translateX = mobileRect.left - targetRect.left;
-        const translateY = mobileRect.top - targetRect.top;
+    if (isOpen && contentRef.current && cardRef.current) {
+      const mobileRect = cardRef.current.getBoundingClientRect();
+      const targetRect = contentRef.current.getBoundingClientRect();
+      const scaleX = mobileRect.width / targetRect.width;
+      const scaleY = mobileRect.height / targetRect.height;
+      const translateX = mobileRect.left - targetRect.left;
+      const translateY = mobileRect.top - targetRect.top;
 
-        contentRef.current.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-        contentRef.current.style.transformOrigin = 'top left';
+      contentRef.current.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+      contentRef.current.style.transformOrigin = 'top left';
 
-        requestAnimationFrame(() => {
-          setIsAnimating(true);
-          setShowDetails(true);
+      requestAnimationFrame(() => {
+        setIsAnimating(true);
+        setShowDetails(true);
 
-          if (contentRef.current) {
-            contentRef.current.style.transform = '';
-            contentRef.current.style.transformOrigin = '';
-          }
-        });
-      }
-    }, [isOpen]);
+        if (contentRef.current) {
+          contentRef.current.style.transform = '';
+          contentRef.current.style.transformOrigin = '';
+        }
+      });
+    }
+  }, [isOpen]);
 
   const handleOpen = () => {
     setIsOpen(true);
@@ -126,7 +128,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ candidate }) => {
         </div>
         <div className="card-section">
           <h3 className="section-title"><Gamepad2 size={18} /> Jeux en commun :</h3>
-          <div className="chips">{gamesLabels.map((g, i) => <span key={i} className="chip">{g}</span>)}</div>
+          <div className="chips">
+            {gamesCommonLabels.length > 0
+              ? gamesCommonLabels.map((g, i) => <span key={i} className="chip">{g}</span>)
+              : <span className="no-common">Aucun jeu en commun</span>
+            }
+          </div>
         </div>
       </div>
     </div>
@@ -144,20 +151,21 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ candidate }) => {
         onMouseDown={(e) => e.stopPropagation()}
       >
         <button className="profile-close-btn" onClick={handleClose}><X size={20} /></button>
-
         <div className="profile-card-inner expanded-content">
           <div className="card-header">
             <h2 className="username">{username}</h2>
             <div className="avatar large"><User size={72} strokeWidth={1.5} /></div>
           </div>
-
           <div className="card-section">
             <h3 className="section-title"><Gamepad2 size={18} /> Jeux en commun :</h3>
-            <div className="chips">{gamesLabels.map((g, i) => <span key={i} className="chip">{g}</span>)}</div>
+            <div className="chips">
+              {gamesCommonLabels.length > 0
+                ? gamesCommonLabels.map((g, i) => <span key={i} className="chip">{g}</span>)
+                : <span className="no-common">Aucun jeu en commun</span>
+              }
+            </div>
           </div>
-
           <div className={`card-divider ${showDetails ? 'visible' : ''}`} />
-
           <div className={`card-details ${showDetails ? 'show' : ''}`}>
             <div>
               <h4 className="detail-title"><Clock size={16} /> Disponibilités :</h4>
