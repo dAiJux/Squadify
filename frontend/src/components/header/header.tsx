@@ -13,7 +13,7 @@ const Header: React.FC = () => {
   const isHome = location.pathname === '/';
   const isSetup = location.pathname === '/setup';
 
-  const routePatterns = ['/', '/setup', '/matchmaking/*', '/chat', '/profile/*', '/profile'];
+  const routePatterns = ['/', '/setup', '/matchmaking/*', '/chat', '/chat/*', '/profile'];
   const isKnownRoute = routePatterns.some((pattern) => !!matchPath(pattern, location.pathname));
   const isNotFound = !isKnownRoute;
   const logoSrc = isHome ? '/icons/squadify.png' : '/SVGs/squadify_ico.svg';

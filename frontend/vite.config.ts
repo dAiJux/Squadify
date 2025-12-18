@@ -10,6 +10,13 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
+        ws: true,
+        configure: (proxy) => {
+          proxy.on('proxyRes', (proxyRes) => {
+            proxyRes.headers['connection'] = 'keep-alive';
+            proxyRes.headers['cache-control'] = 'no-cache';
+          });
+        },
       },
     }
   }

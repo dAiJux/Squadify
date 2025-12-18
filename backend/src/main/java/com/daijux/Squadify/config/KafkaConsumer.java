@@ -1,5 +1,6 @@
 package com.daijux.Squadify.config;
 
+import com.daijux.Squadify.event.MessageEvent;
 import com.daijux.Squadify.event.SwipeEvent;
 import com.daijux.Squadify.event.UserRegistration;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -36,7 +37,6 @@ public class KafkaConsumer {
         jsonDeserializer.setRemoveTypeHeaders(false);
         jsonDeserializer.setUseTypeHeaders(false);
         jsonDeserializer.addTrustedPackages("com.daijux.Squadify.event");
-
         return new DefaultKafkaConsumerFactory<>(
                 getCommonProps(),
                 new StringDeserializer(),
@@ -56,7 +56,6 @@ public class KafkaConsumer {
         jsonDeserializer.setRemoveTypeHeaders(false);
         jsonDeserializer.setUseTypeHeaders(false);
         jsonDeserializer.addTrustedPackages("com.daijux.Squadify.event");
-
         return new DefaultKafkaConsumerFactory<>(
                 getCommonProps(),
                 new StringDeserializer(),
@@ -68,6 +67,26 @@ public class KafkaConsumer {
     public ConcurrentKafkaListenerContainerFactory<String, SwipeEvent> swipeListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, SwipeEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(swipeConsumerFactory());
+        return factory;
+    }
+
+    public ConsumerFactory<String, MessageEvent> messageConsumerFactory() {
+        JsonDeserializer<MessageEvent> jsonDeserializer = new JsonDeserializer<>(MessageEvent.class);
+        jsonDeserializer.setRemoveTypeHeaders(false);
+        jsonDeserializer.setUseTypeHeaders(false);
+        jsonDeserializer.addTrustedPackages("com.daijux.Squadify.event");
+
+        return new DefaultKafkaConsumerFactory<>(
+                getCommonProps(),
+                new StringDeserializer(),
+                jsonDeserializer
+        );
+    }
+
+    @Bean
+    public ConcurrentKafkaListenerContainerFactory<String, MessageEvent> messageListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, MessageEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(messageConsumerFactory());
         return factory;
     }
 }

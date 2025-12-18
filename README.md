@@ -71,8 +71,7 @@ L'application suit une architecture événementielle pour le chat en temps réel
 
 ### Prérequis
 
-- [Docker](https://www.docker.com/get-started) et Docker Compose installés
-- Aucune autre installation nécessaire !
+[Docker](https://www.docker.com/get-started) installé.
 
 ### Étapes
 

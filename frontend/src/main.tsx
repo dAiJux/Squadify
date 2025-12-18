@@ -13,11 +13,12 @@ import Profile from './pages/profile/profile.tsx';
 import NotFound from './pages/not-found/notFound.tsx';
 import AuthGuard from './guards/authGuard.tsx';
 import Header from './components/header/header.tsx';
+import ChatLobby from './pages/chat/lobby/lobby.tsx';
+import Conversation from './pages/chat/conversation/conversation.tsx';
 
 const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const dispatch = useDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
-
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -25,7 +26,6 @@ const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) =
         if (res.ok) {
           const data = await res.json();
           dispatch(setUserData(data));
-
           if (data.setupCompleted && data.userId) {
             const profileRes = await fetch(`/api/profiles/${data.userId}`, {
               credentials: 'include'
@@ -42,10 +42,8 @@ const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) =
         setIsInitialized(true);
       }
     };
-
     initAuth();
   }, [dispatch]);
-
   if (!isInitialized) {
     return (
       <div style={{
@@ -58,7 +56,6 @@ const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) =
       </div>
     );
   }
-
   return <>{children}</>;
 };
 
@@ -87,6 +84,22 @@ const App = () => {
               }
             />
             <Route
+              path="/chat"
+              element={
+                <AuthGuard requireSetup={true}>
+                  <ChatLobby />
+                </AuthGuard>
+              }
+            />
+            <Route
+              path="/chat/:matchId"
+              element={
+                <AuthGuard requireSetup={true}>
+                  <Conversation />
+                </AuthGuard>
+              }
+            />
+            <Route
               path="/profile"
               element={
                 <AuthGuard requireSetup={true}>
@@ -103,7 +116,6 @@ const App = () => {
 };
 
 const rootElement = document.getElementById('app');
-
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
     <React.StrictMode>

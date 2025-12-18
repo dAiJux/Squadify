@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ⚛️ Squadify - Frontend
 
-## Getting Started
+Ce répertoire contient l'interface utilisateur de l'application Squadify, développée avec React et optimisée pour l'architecture full-stack du projet.
 
-First, run the development server:
+## 🛠️ Technologies Clés
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+* **Framework :** [React 18](https://reactjs.org/)
+* **Build Tool :** [Vite](https://vitejs.dev/)
+* **Routage :** [React Router](https://reactrouter.com/en/main)
+* **Styling :** [Tailwind CSS](https://tailwindcss.com/)
+* **Langage :** TypeScript
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Démarrage du Frontend (Contexte Full-Stack)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Pour lancer le frontend en conjonction avec le backend (Spring Boot, MongoDB, Kafka), veuillez utiliser la procédure de lancement globale du projet :
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1.  **Assurez-vous d'être à la racine du projet** (`/squadify`).
+2.  **Lancez l'intégralité de l'application via Docker Compose :**
+    ```bash
+    docker-compose up -d
+    ```
+3.  Le frontend sera accessible sur **`http://localhost:8080`** (ou le port configuré pour le backend/proxy).
 
-## Learn More
+*Consultez le `README.md` principal pour les instructions complètes.*
 
-To learn more about Next.js, take a look at the following resources:
+## ⚙️ Démarrage Local Indépendant (Développement Frontend seul)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Si vous souhaitez développer uniquement le frontend et utiliser un mock de l'API ou un backend en cours d'exécution séparément :
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Prérequis
 
-## Deploy on Vercel
+* Node.js (version 18+)
+* npm ou yarn
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Étapes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1.  **Installation des dépendances :**
+    ```bash
+    npm install
+    # ou yarn install
+    ```
+
+2.  **Lancement du serveur de développement (Vite) :**
+    ```bash
+    npm run dev
+    # ou yarn dev
+    ```
+
+## 💡 Remarques sur le Style
+
+Ce projet utilise [Tailwind CSS](https://tailwindcss.com/). Le fichier de configuration principal est `tailwind.config.ts`.
