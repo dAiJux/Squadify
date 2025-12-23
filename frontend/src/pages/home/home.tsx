@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
+import { Gamepad2, Headphones, Trophy, Swords, Target, Zap, Users, Shield } from 'lucide-react';
 import './home.css';
 import Auth from '../../components/auth/auth.tsx';
 
@@ -39,31 +40,42 @@ const Home = () => {
   };
 
   return (
-    <div className="home-container">
-      <div className="decor-pulse-blue animate-pulse-slow"></div>
-      <div className="decor-pulse-violet animate-pulse-slow delay-200"></div>
-      <div className="decor-left-joystick"></div>
-      <div className="decor-right-target-ring"></div>
-      <div className="decor-right-target-dot"></div>
-      <main className="home-card">
-        <p className="home-card-text">
-          Squadify est la plateforme dédiée aux joueurs cherchant à former l'équipe parfaite.
-          Ne laissez plus le hasard décider de vos coéquipiers. Parcourez des profils détaillés,
-          découvrez des joueurs compatibles avec votre style et vos ambitions, et connectez-vous
-          pour lancer votre prochaine partie.
-        </p>
-        <div className="home-card-actions">
-          <div className="home-card-action-group">
-            <p className="home-card-action-text">Déjà un compte ?</p>
-            <button className="btn btnPrimary home-card-button" onClick={handleLogin}>Connexion</button>
-          </div>
-          <div className="separator"></div>
-          <div className="home-card-action-group">
-            <p className="home-card-action-text">Nouveau sur Squadify ?</p>
-            <button className="btn btnSecondary home-card-button" onClick={handleRegister}>Inscription</button>
+    <div className="home">
+      <div className="home__bg-gradient" />
+      <div className="home__glow-1" />
+      <div className="home__glow-2" />
+      <div className="home__floating-icons">
+        <Gamepad2 className="home__float-icon home__float-icon--1" />
+        <Headphones className="home__float-icon home__float-icon--2" />
+        <Trophy className="home__float-icon home__float-icon--3" />
+        <Swords className="home__float-icon home__float-icon--4" />
+        <Target className="home__float-icon home__float-icon--5" />
+        <Zap className="home__float-icon home__float-icon--6" />
+        <Users className="home__float-icon home__float-icon--7" />
+        <Shield className="home__float-icon home__float-icon--8" />
+      </div>
+      <div className="home__content">
+        <div className="home__hero">
+          <img src="/icons/squadify.png" alt="Squadify" className="home__logo" />
+          <p className="home__subtitle">Trouvez vos coéquipiers parfaits</p>
+        </div>
+        <div className="home__card">
+          <p className="home__description">
+            La plateforme dédiée aux gamers qui veulent former l'équipe idéale.
+            Parcourez des profils, trouvez des joueurs compatibles avec votre style,
+            et lancez votre prochaine partie ensemble.
+          </p>
+          <div className="home__actions">
+            <button className="home__btn home__btn--primary" onClick={handleLogin}>
+              Connexion
+            </button>
+            <span className="home__divider">ou</span>
+            <button className="home__btn home__btn--secondary" onClick={handleRegister}>
+              Créer un compte
+            </button>
           </div>
         </div>
-      </main>
+      </div>
       <Auth isOpen={isModalOpen} onClose={handleCloseModal} initialTab={modalTab} />
     </div>
   );

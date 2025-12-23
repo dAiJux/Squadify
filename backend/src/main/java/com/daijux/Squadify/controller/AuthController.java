@@ -8,6 +8,7 @@ import com.daijux.Squadify.dto.RegistrationRequest;
 import com.daijux.Squadify.model.User;
 import com.daijux.Squadify.service.AuthService;
 import com.daijux.Squadify.util.CookieUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,81 +21,81 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    private final AuthService authService;
-    private final CookieUtil cookieUtil;
+        private final AuthService authService;
+        private final CookieUtil cookieUtil;
 
-    public AuthController(AuthService authService, CookieUtil cookieUtil) {
-        this.authService = authService;
-        this.cookieUtil = cookieUtil;
-    }
-
-    @PostMapping("/register")
-    public Mono<ResponseEntity<Map<String, String>>> register(@RequestBody RegistrationRequest request) {
-        return authService.register(request)
-                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
-                .onErrorResume(ResponseStatusException.class, e ->
-                        Mono.just(ResponseEntity.status(e.getStatusCode())
-                                .body(Map.of("error", e.getReason() != null ? e.getReason() : "Registration failed")))
-                );
-    }
-
-    @PostMapping("/login")
-    public Mono<ResponseEntity<Void>> login(@RequestBody LoginRequest request) {
-        return authService.login(request)
-                .map(authResponse -> ResponseEntity.ok()
-                        .header(HttpHeaders.SET_COOKIE, cookieUtil.createAuthCookie(authResponse.getToken()).toString())
-                        .<Void>build())
-                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
-    }
-
-    @GetMapping("/me")
-    public Mono<ResponseEntity<AuthResponse>> me(@CookieValue(name = "squadify_token", required = false) String token) {
-        if (token == null) {
-            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        @PostMapping("/register")
+        public Mono<ResponseEntity<Map<String, String>>> register(@RequestBody RegistrationRequest request) {
+                return authService.register(request)
+                                .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
+                                .onErrorResume(ResponseStatusException.class,
+                                                e -> Mono.just(ResponseEntity.status(e.getStatusCode())
+                                                                .body(Map.of("error", e.getReason() != null
+                                                                                ? e.getReason()
+                                                                                : "Registration failed"))));
         }
-        return authService.validateAndGetUser(token)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
-    }
 
-    @PostMapping("/logout")
-    public Mono<ResponseEntity<Void>> logout() {
-        return Mono.just(ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookieUtil.createLogoutCookie().toString())
-                .build());
-    }
+        @PostMapping("/login")
+        public Mono<ResponseEntity<Void>> login(@RequestBody LoginRequest request) {
+                return authService.login(request)
+                                .map(authResponse -> ResponseEntity.ok()
+                                                .header(HttpHeaders.SET_COOKIE,
+                                                                cookieUtil.createAuthCookie(authResponse.getToken())
+                                                                                .toString())
+                                                .<Void>build())
+                                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
+        }
 
-    @PostMapping("/change-password")
-    public Mono<ResponseEntity<Void>> changePassword(
-            @AuthenticationPrincipal User user,
-            @RequestBody ChangePasswordRequest request) {
-        return authService.changePassword(user.getId(), request)
-                .then(Mono.just(ResponseEntity.ok().<Void>build()))
-                .onErrorResume(ResponseStatusException.class, e ->
-                        Mono.just(ResponseEntity.status(e.getStatusCode()).build())
-                )
-                .onErrorResume(e ->
-                        Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
-                );
-    }
+        @GetMapping("/me")
+        public Mono<ResponseEntity<AuthResponse>> me(
+                        @CookieValue(name = "squadify_token", required = false) String token) {
+                if (token == null) {
+                        return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+                }
+                return authService.validateAndGetUser(token)
+                                .map(ResponseEntity::ok)
+                                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+        }
 
-    @DeleteMapping("/delete-account")
-    public Mono<ResponseEntity<Void>> deleteAccount(
-            @AuthenticationPrincipal User user,
-            @RequestBody DeleteAccountRequest request) {
-
-        return authService.deleteAccount(user.getId(), request.getPassword())
-                .thenReturn(ResponseEntity.ok()
-                        .header(HttpHeaders.SET_COOKIE, cookieUtil.createLogoutCookie().toString())
-                        .<Void>build())
-                .onErrorResume(ResponseStatusException.class, e ->
-                        Mono.just(ResponseEntity.status(e.getStatusCode())
+        @PostMapping("/logout")
+        public Mono<ResponseEntity<Void>> logout() {
+                return Mono.just(ResponseEntity.ok()
                                 .header(HttpHeaders.SET_COOKIE, cookieUtil.createLogoutCookie().toString())
-                                .build()))
-                .onErrorResume(e ->
-                        Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
-                );
-    }
+                                .build());
+        }
+
+        @PostMapping("/change-password")
+        public Mono<ResponseEntity<Void>> changePassword(
+                        @AuthenticationPrincipal User user,
+                        @RequestBody ChangePasswordRequest request) {
+                return authService.changePassword(user.getId(), request)
+                                .then(Mono.just(ResponseEntity.ok().<Void>build()))
+                                .onErrorResume(ResponseStatusException.class,
+                                                e -> Mono.just(ResponseEntity.status(e.getStatusCode()).build()))
+                                .onErrorResume(e -> Mono
+                                                .just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
+        }
+
+        @DeleteMapping("/delete-account")
+        public Mono<ResponseEntity<Void>> deleteAccount(
+                        @AuthenticationPrincipal User user,
+                        @RequestBody DeleteAccountRequest request) {
+
+                return authService.deleteAccount(user.getId(), request.getPassword())
+                                .thenReturn(ResponseEntity.ok()
+                                                .header(HttpHeaders.SET_COOKIE,
+                                                                cookieUtil.createLogoutCookie().toString())
+                                                .<Void>build())
+                                .onErrorResume(ResponseStatusException.class,
+                                                e -> Mono.just(ResponseEntity.status(e.getStatusCode())
+                                                                .header(HttpHeaders.SET_COOKIE,
+                                                                                cookieUtil.createLogoutCookie()
+                                                                                                .toString())
+                                                                .build()))
+                                .onErrorResume(e -> Mono
+                                                .just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));
+        }
 }

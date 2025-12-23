@@ -1,125 +1,78 @@
 @import "tailwindcss";
 
 .setup-container {
-    @apply min-h-screen flex flex-col items-center justify-center bg-slate-900 p-8 font-sans;
+  @apply min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 pt-20 pb-20;
 }
 
 .setup-card {
-    @apply bg-slate-900/70 backdrop-blur-lg p-12 rounded-2xl
-           shadow-2xl shadow-blue-500/10 w-full max-w-4xl
-           border border-blue-500/30;
+  @apply bg-slate-900/60 backdrop-blur-xl p-6 sm:p-8 lg:p-12 rounded-2xl w-full max-w-3xl border border-slate-700/50;
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.05);
 }
 
 .setup-title {
-    @apply text-4xl text-blue-400 text-center mb-4 font-bold tracking-tight;
-    text-shadow: 0 0 8px theme(colors.blue.400);
+  @apply text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-3 bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent;
 }
 
 .setup-subtitle {
-    @apply text-gray-400 text-center mb-16 text-lg px-4;
+  @apply text-gray-400 text-center mb-10 sm:mb-12 text-sm sm:text-base;
 }
 
 .setup-section {
-    @apply mb-12;
+  @apply mb-8 sm:mb-10;
 }
 
 .section-title {
-    @apply text-violet-400 text-lg mb-5 uppercase tracking-widest font-bold border-l-4 border-violet-500 pl-3;
+  @apply text-blue-400 text-sm sm:text-base mb-4 uppercase tracking-widest font-semibold border-l-2 border-blue-500 pl-3;
 }
 
 .options-grid {
-    @apply flex flex-wrap gap-6;
+  @apply flex flex-wrap gap-2 sm:gap-3;
 }
 
 .option-card {
-    @apply bg-slate-800/60 text-gray-300 py-3 px-6 rounded-lg cursor-pointer
-           transition-all duration-200 border border-gray-700 select-none font-medium;
+  @apply bg-slate-800/60 text-gray-300 py-2 sm:py-2.5 px-3 sm:px-4 rounded-xl cursor-pointer transition-all duration-200 border border-slate-700/50 select-none text-sm sm:text-base font-medium;
 }
 
 .option-card:hover {
-    @apply bg-slate-700 border-blue-500/50 -translate-y-0.5;
+  @apply bg-slate-700/80 border-slate-600;
 }
 
 .option-card.selected {
-    @apply bg-blue-900/40 text-blue-200 border-blue-400
-           shadow-lg shadow-blue-600/40 translate-y-0
-           font-semibold;
-    box-shadow: 0 0 10px theme(colors.blue.500), inset 0 0 5px theme(colors.blue.300);
+  @apply bg-blue-500/20 text-blue-300 border-blue-500/50;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
 }
 
 .setup-footer {
-    @apply mt-20 flex justify-center;
+  @apply mt-10 sm:mt-12 flex justify-center;
 }
 
 .finish-btn {
-    @apply bg-gradient-to-r from-violet-600 to-pink-600 text-white
-           py-4 px-16 rounded-full font-bold text-xl cursor-pointer
-           border-none transition-all duration-300
-           shadow-lg shadow-violet-900/50;
+  @apply w-full sm:w-auto bg-gradient-to-r from-blue-500 to-violet-500 text-white py-3.5 sm:py-4 px-10 sm:px-16 rounded-xl font-semibold text-base sm:text-lg cursor-pointer transition-all duration-300;
+  box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
 }
 
 .finish-btn:hover {
-    @apply scale-105 shadow-xl shadow-violet-600/60 brightness-110;
+  @apply from-blue-400 to-violet-400;
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 640px) {
-  .setup-card {
-    @apply p-8;
-  }
-
-  .setup-title {
-    @apply text-3xl mb-3;
-  }
-
-  .setup-subtitle {
-    @apply mb-10 text-base px-4;
-  }
-
   .options-grid {
-    @apply grid grid-cols-3 gap-4;
+    @apply grid grid-cols-2 gap-2;
   }
 
   .option-card {
-    @apply text-sm py-2 px-3 rounded-md;
-  }
-
-  .option-card:hover {
-    @apply -translate-y-0;
-  }
-
-  .option-card.selected {
-    @apply shadow-md;
-  }
-
-  .setup-footer {
-    @apply mt-10;
-  }
-
-  .finish-btn {
-    @apply py-3 px-10 text-lg;
+    @apply text-center text-sm py-2 px-2;
   }
 }
 
 @media (max-width: 420px) {
   .setup-card {
-    @apply p-6;
-  }
-
-  .setup-title {
-    @apply text-2xl mb-4;
-  }
-
-  .options-grid {
-    @apply grid grid-cols-2 gap-3;
+    @apply p-5;
   }
 
   .option-card {
-    @apply text-xs py-2 px-2 rounded-md;
-    word-break: break-word;
-    text-align: center;
-  }
-
-  .finish-btn {
-    @apply py-3 px-8 text-lg;
+    @apply text-xs;
   }
 }

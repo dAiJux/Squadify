@@ -1,52 +1,73 @@
 @import "tailwindcss";
 
 @keyframes pulse-slow {
-  0%, 100% { transform: scale(1); opacity: 0.1; }
-  50% { transform: scale(1.1); opacity: 0.2; }
+  0%, 100% { transform: scale(1); opacity: 0.3; }
+  50% { transform: scale(1.05); opacity: 0.5; }
+}
+
+html, body, #app {
+  @apply h-full;
+  overflow-x: hidden;
 }
 
 body {
-  @apply bg-slate-900 text-gray-200;
+  @apply bg-slate-950 text-gray-200 antialiased;
+  background-image: 
+    radial-gradient(ellipse 100% 100% at 50% -50%, rgba(59, 130, 246, 0.08), transparent 50%),
+    radial-gradient(ellipse 80% 80% at 100% 100%, rgba(139, 92, 246, 0.05), transparent 50%);
 }
 
 @layer components {
   .btn {
-    @apply lg:text-base text-sm px-6 py-3 rounded-lg font-semibold cursor-pointer;
-    @apply transition-all duration-300 ease-in-out;
-    @apply text-center uppercase tracking-wider;
+    @apply text-sm sm:text-base px-6 py-3 rounded-xl font-semibold cursor-pointer;
+    @apply transition-all duration-300 ease-out;
+    @apply text-center tracking-wide;
   }
 
   .btnPrimary {
-    @apply bg-blue-500 text-white;
-    box-shadow: 0 0 5px theme(colors.blue.400),
-                0 0 10px theme(colors.blue.500),
-                0 0 15px theme(colors.blue.600);
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
   }
 
   .btnPrimary:hover {
-    @apply bg-blue-400;
-    box-shadow: 0 0 10px theme(colors.blue.300),
-                0 0 20px theme(colors.blue.400),
-                0 0 30px theme(colors.blue.500);
+    @apply from-blue-400 to-blue-500;
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+    transform: translateY(-2px);
   }
 
   .btnSecondary {
-    @apply bg-transparent text-violet-400 border border-violet-500;
-    box-shadow: 0 0 5px theme(colors.violet.500),
-                inset 0 0 5px theme(colors.violet.500);
+    @apply bg-transparent text-violet-400 border border-violet-500/50;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.15),
+                inset 0 0 10px rgba(139, 92, 246, 0.05);
   }
 
   .btnSecondary:hover {
-    @apply bg-violet-900/40 text-violet-300;
-    box-shadow: 0 0 10px theme(colors.violet.400),
-                inset 0 0 10px theme(colors.violet.400);
+    @apply bg-violet-500/10 text-violet-300 border-violet-400;
+    box-shadow: 0 0 25px rgba(139, 92, 246, 0.3),
+                inset 0 0 15px rgba(139, 92, 246, 0.1);
+    transform: translateY(-2px);
   }
 
-  .animate-pulse-slow {
-    animation: pulse-slow 8s infinite ease-in-out;
+  .page-container {
+    @apply min-h-screen pt-20 sm:pt-24 px-4 sm:px-6 lg:px-8;
   }
 
-  .delay-200 { animation-delay: 2s; }
-  .delay-400 { animation-delay: 4s; }
-  .delay-600 { animation-delay: 6s; }
+  .card {
+    @apply bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-xl;
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  .input {
+    @apply w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-gray-200 placeholder-gray-500;
+    @apply focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all;
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+
+  .glow-violet {
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  }
 }

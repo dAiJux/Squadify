@@ -1,21 +1,19 @@
 package com.daijux.Squadify.kafka;
 
 import com.daijux.Squadify.event.MessageEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class ChatProducer {
-    private static final Logger log = LoggerFactory.getLogger(ChatProducer.class);
+
     private static final String TOPIC_MESSAGES = "chat.messages";
 
     private final KafkaTemplate<String, Object> kafkaTemplate;
-
-    public ChatProducer(KafkaTemplate<String, Object> kafkaTemplate) {
-        this.kafkaTemplate = kafkaTemplate;
-    }
 
     public void sendMessage(MessageEvent event) {
         try {

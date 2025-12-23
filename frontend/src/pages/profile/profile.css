@@ -1,11 +1,12 @@
 @import "tailwindcss";
 
 .profile-page {
-  @apply min-h-screen flex items-start justify-center w-full px-4 lg:px-16 py-8 bg-slate-900 text-gray-200;
+  @apply min-h-screen flex items-start justify-center w-full px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-20;
 }
 
 .profile-card {
-  @apply relative w-full max-w-4xl bg-slate-900/70 backdrop-blur-lg rounded-2xl border border-blue-500/30 p-5 md:p-8 shadow-2xl;
+  @apply relative w-full max-w-3xl bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-5 sm:p-6 lg:p-8;
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.05);
 }
 
 .profile-top {
@@ -13,7 +14,8 @@
 }
 
 .profile-avatar-large {
-  @apply w-20 h-20 min-w-[5rem] rounded-full bg-slate-800 flex items-center justify-center text-blue-300 text-2xl font-bold border-2 border-violet-500/30;
+  @apply w-16 h-16 sm:w-20 sm:h-20 min-w-[4rem] sm:min-w-[5rem] rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white text-xl sm:text-2xl font-bold;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
 }
 
 .profile-meta {
@@ -21,7 +23,7 @@
 }
 
 .profile-title {
-  @apply text-3xl font-extrabold text-blue-400 truncate;
+  @apply text-2xl sm:text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent truncate;
 }
 
 .profile-sub {
@@ -29,35 +31,38 @@
 }
 
 .profile-actions-top {
-  @apply absolute top-5 right-5 z-40 flex items-center md:top-8 md:right-8;
+  @apply absolute top-5 right-5 z-40 flex items-center sm:top-6 sm:right-6 lg:top-8 lg:right-8;
 }
 
 .logout-icon {
-  @apply w-10 h-10 flex items-center justify-center rounded-full cursor-pointer text-white transition-transform border-2 border-white/[0.06];
-  background: linear-gradient(90deg, #ef4444, #ef4444);
-  box-shadow: 0 6px 18px rgba(220,38,38,0.18), inset 0 -4px 10px rgba(255,120,120,0.06);
+  @apply w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center rounded-xl cursor-pointer text-white transition-all;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
 .logout-icon:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(220,38,38,0.25), inset 0 0 18px rgba(255,120,120,0.08);
-  filter: brightness(1.05);
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.5);
 }
 
 .tabs {
-  @apply flex gap-2 mt-6;
+  @apply flex gap-1 sm:gap-2 mt-6 p-1 bg-slate-800/50 rounded-xl;
 }
 
 .tab {
-  @apply px-3 py-2 rounded-md text-sm text-gray-300 bg-transparent border border-transparent cursor-pointer transition-colors hover:text-white hover:bg-slate-800/40;
+  @apply flex-1 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 bg-transparent cursor-pointer transition-all text-center;
+}
+
+.tab:hover {
+  @apply text-gray-200;
 }
 
 .tab.active {
-  @apply bg-slate-800/80 text-white border border-blue-500/30 shadow-sm;
+  @apply bg-slate-700/80 text-white shadow-lg;
 }
 
 .card-section {
-  @apply mt-6 pt-6 border-t border-gray-800/50;
+  @apply mt-6 pt-6 border-t border-slate-700/50;
 }
 
 .delete-section {
@@ -65,17 +70,11 @@
 }
 
 .section-title-inline {
-  @apply text-violet-400 text-sm uppercase tracking-widest font-bold inline-flex items-center gap-2 m-0;
+  @apply text-blue-400 text-xs sm:text-sm uppercase tracking-widest font-semibold inline-flex items-center gap-2 m-0;
 }
 
 .icon-edit-inline {
-  @apply text-gray-300 bg-transparent px-1 py-0.5 rounded-md border-none cursor-pointer;
-  transition: background-color 120ms ease, box-shadow 120ms ease;
-}
-
-.icon-edit-inline:hover {
-  @apply bg-slate-800/40;
-  box-shadow: 0 0 8px rgba(0,0,0,0.4) inset;
+  @apply text-gray-400 bg-transparent p-1 rounded-lg border-none cursor-pointer transition-all hover:text-white hover:bg-slate-700/50;
 }
 
 .read-block {
@@ -83,11 +82,11 @@
 }
 
 .row {
-  @apply flex items-center gap-4 mt-3;
+  @apply flex items-center gap-3 sm:gap-4 mt-3;
 }
 
 .label {
-  @apply w-36 text-sm text-gray-400 shrink-0;
+  @apply w-28 sm:w-36 text-sm text-gray-500 shrink-0;
 }
 
 .value {
@@ -99,7 +98,7 @@
 }
 
 .chip {
-  @apply bg-slate-800/60 text-gray-300 py-1 px-3 rounded-lg text-sm border border-white/5;
+  @apply bg-slate-800/80 text-gray-300 py-1.5 px-3 rounded-lg text-sm border border-slate-700/50;
 }
 
 .edit-block {
@@ -115,24 +114,29 @@
 }
 
 .form-row input {
-  @apply bg-slate-800/60 border border-gray-700/60 rounded-md p-2 text-gray-200 outline-none focus:border-blue-500/50 transition-colors;
+  @apply bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2.5 text-gray-200 outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all;
 }
 
 .options-grid {
-  @apply flex flex-wrap gap-3 mt-2;
+  @apply flex flex-wrap gap-2 mt-2;
 }
 
 .options-grid.single-row {
   @apply flex-nowrap overflow-x-auto pb-2;
+  scrollbar-width: none;
+}
+
+.options-grid.single-row::-webkit-scrollbar {
+  display: none;
 }
 
 .option-card {
-  @apply bg-slate-800/40 text-gray-300 py-1.5 px-3 rounded-md cursor-pointer transition-all duration-150 border border-gray-700/50 text-[0.9rem] hover:bg-slate-700/60 hover:border-gray-600;
+  @apply bg-slate-800/60 text-gray-300 py-2 px-3 rounded-xl cursor-pointer transition-all duration-200 border border-slate-700/50 text-sm hover:bg-slate-700/80 hover:border-slate-600;
 }
 
 .option-card.selected {
-  @apply bg-blue-900/40 text-blue-200 border-blue-400 font-semibold;
-  box-shadow: 0 0 10px rgba(59,130,246,0.15);
+  @apply bg-blue-500/20 text-blue-300 border-blue-500/50 font-medium;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
 }
 
 .section-controls {
@@ -152,29 +156,35 @@
 }
 
 .btn-small {
-  @apply flex justify-center items-center text-sm px-4 py-2 rounded-md transition-opacity duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
+  @apply flex justify-center items-center text-sm px-5 py-2.5 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer font-medium;
 }
 
 .btn-small.btnPrimary {
-  @apply text-sm px-5 py-2 rounded-md bg-blue-600 hover:bg-blue-500 text-white font-medium shadow-lg shadow-blue-900/20;
+  @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-small.btnPrimary:hover:not(:disabled) {
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
 }
 
 .btn-small.btnSecondary {
-  @apply text-sm px-5 py-2 rounded-md bg-transparent border border-gray-700 text-gray-300 hover:bg-gray-800/50 shadow-md shadow-black/10 hover:shadow-lg hover:shadow-black/20;
+  @apply bg-transparent border border-slate-600 text-gray-300 hover:bg-slate-800/50 hover:border-slate-500;
 }
 
 .delete-btn {
-  @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wider bg-transparent text-red-400 border border-red-500/50 transition-all duration-300 ease-in-out cursor-pointer;
-  box-shadow: 0 0 5px rgba(139, 0, 0, 0.2), inset 0 0 5px rgba(139, 0, 0, 0.1);
+  @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-medium bg-transparent text-red-400 border border-red-500/40 transition-all duration-200 cursor-pointer;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.1);
 }
 
 .delete-btn:hover {
-  @apply bg-red-950/30 text-red-300 border-red-500;
-  box-shadow: 0 0 15px rgba(220, 38, 38, 0.15), inset 0 0 10px rgba(220, 38, 38, 0.1);
+  @apply bg-red-500/10 text-red-300 border-red-500/60;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
 }
 
 .delete-btn-confirm {
-  @apply bg-red-900/40 border-red-500 text-red-300 hover:bg-red-900/60;
+  @apply bg-red-500/20 border-red-500/60 text-red-300;
 }
 
 .security-block {
@@ -182,11 +192,19 @@
 }
 
 .notice {
-  @apply mt-6 text-sm text-green-400 bg-green-900/20 px-4 py-2 rounded border border-green-500/20;
+  @apply mt-6 text-sm px-4 py-3 rounded-xl border;
+}
+
+.notice.success {
+  @apply text-emerald-400 bg-emerald-500/10 border-emerald-500/20;
+}
+
+.notice.error {
+  @apply text-red-400 bg-red-500/10 border-red-500/20;
 }
 
 .muted {
-  @apply text-gray-400 text-sm;
+  @apply text-gray-500 text-sm;
 }
 
 .modal-overlay {
@@ -194,12 +212,14 @@
 }
 
 .modal-card {
-  @apply w-full max-w-md bg-slate-900 border border-blue-500/30 rounded-xl p-8 shadow-2xl relative text-center;
+  @apply w-full max-w-md bg-slate-900/95 border border-slate-700/50 rounded-2xl p-6 sm:p-8 shadow-2xl relative text-center backdrop-blur-xl;
+  box-shadow: 0 0 60px rgba(59, 130, 246, 0.1);
   animation: modalPop 0.2s ease-out;
 }
 
 .modal-card-delete {
-  @apply border-red-500/50;
+  @apply border-red-500/30;
+  box-shadow: 0 0 60px rgba(239, 68, 68, 0.1);
 }
 
 .delete-modal-header {
@@ -207,31 +227,47 @@
 }
 
 .modal-title {
-  @apply text-2xl font-bold text-white mb-4;
+  @apply text-xl sm:text-2xl font-bold text-white mb-4;
 }
 
 .modal-text {
-  @apply text-gray-300 text-base mb-8 leading-relaxed;
+  @apply text-gray-400 text-sm sm:text-base mb-6 leading-relaxed;
 }
 
 .modal-form-row {
-  @apply mb-6;
+  @apply mb-6 text-left;
 }
 
 .modal-label-input {
-  @apply text-gray-400 text-sm font-medium;
+  @apply text-gray-400 text-sm font-medium block mb-2;
 }
 
 .modal-input-password {
-  @apply w-full bg-slate-800/60 border border-gray-700/60 rounded-md p-2 text-gray-200 outline-none focus:border-blue-500/50 transition-colors;
+  @apply w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-3 text-gray-200 outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all;
 }
 
 .modal-error-message {
-  @apply text-red-400 text-xs mt-1;
+  @apply text-red-400 text-xs mt-2;
 }
 
 .modal-actions {
-  @apply flex justify-center gap-4 mt-6;
+  @apply flex justify-center gap-3 mt-6;
+}
+
+.modal-form {
+  @apply space-y-4 mt-4;
+}
+
+.modal-notice {
+  @apply text-sm text-center py-2 px-3 rounded-lg mt-4;
+}
+
+.modal-notice.success {
+  @apply text-green-400 bg-green-500/10;
+}
+
+.modal-notice.error {
+  @apply text-red-400 bg-red-500/10;
 }
 
 @keyframes modalPop {
@@ -245,15 +281,11 @@
   }
 
   .profile-avatar-large {
-    @apply w-16 h-16 min-w-[4rem];
+    @apply w-14 h-14 min-w-[3.5rem] text-lg;
   }
 
   .profile-title {
     @apply text-xl;
-  }
-
-  .profile-sub {
-    @apply text-sm;
   }
 
   .logout-icon {
@@ -261,28 +293,20 @@
   }
 
   .label {
-    @apply w-28;
+    @apply w-24;
   }
 
   .option-card {
-    @apply text-sm py-1 px-2;
-  }
-
-  .tabs {
-    @apply flex-wrap gap-2;
-  }
-
-  .tab {
-     @apply flex-1 text-center;
+    @apply text-sm py-1.5 px-2.5;
   }
 
   .section-controls {
-    @apply flex-col items-center justify-center gap-3;
+    @apply flex-col items-stretch gap-3;
   }
 
   .section-controls button,
   .delete-btn {
-     @apply w-auto min-w-[140px] justify-center;
+     @apply w-full justify-center;
   }
 
   .modal-actions {

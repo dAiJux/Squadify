@@ -32,54 +32,126 @@
   animation: fadeIn 0.5s ease-out forwards;
 }
 
+.matchmaking-empty-state {
+  @apply flex flex-col items-center justify-center min-h-[calc(100vh-8rem)];
+}
+
+.matchmaking-main {
+  @apply min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8;
+  padding-top: 5rem;
+  padding-bottom: 5rem;
+}
+
+.matchmaking-content {
+  @apply flex flex-col items-center w-full max-w-xl;
+}
+
 .match-popup-overlay {
   @apply fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4;
   animation: fadeIn 0.3s ease-out forwards;
 }
 
 .match-popup-content {
-  @apply bg-slate-800 border border-teal-500/50 rounded-2xl p-8 max-w-md w-full text-center shadow-2xl;
+  @apply bg-slate-900/95 border border-violet-500/30 rounded-2xl p-8 max-w-md w-full text-center shadow-2xl backdrop-blur-xl;
   animation: zoomIn 0.3s ease-out forwards;
+  box-shadow: 0 0 60px rgba(139, 92, 246, 0.2);
+}
+
+.match-popup-icon {
+  @apply text-yellow-400 mx-auto w-16 h-16 mb-4 animate-bounce;
+}
+
+.match-popup-title {
+  @apply text-3xl font-bold text-white mb-2;
+}
+
+.match-popup-text {
+  @apply text-gray-300 mb-6;
+}
+
+.match-popup-username {
+  @apply text-violet-400 font-bold;
+}
+
+.match-popup-actions {
+  @apply flex flex-col gap-3;
+}
+
+.match-popup-chat-btn {
+  @apply bg-gradient-to-r from-violet-600 to-violet-700 hover:from-violet-500 hover:to-violet-600 text-white w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold cursor-pointer transition-all;
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.match-popup-chat-btn:hover {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+  transform: translateY(-2px);
+}
+
+.match-popup-continue-btn {
+  @apply text-gray-400 hover:text-white text-sm mt-2 bg-transparent border-none cursor-pointer transition-colors;
 }
 
 .home-container {
-  @apply font-sans flex flex-col items-center mt-4 w-full bg-slate-900 text-gray-200 relative p-6;
-  overflow: hidden;
+  @apply min-h-screen flex flex-col items-center pt-24 sm:pt-28 pb-20 w-full px-4 sm:px-6 lg:px-8 relative;
+}
+
+.home-card {
+  @apply bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-2xl p-8 text-center max-w-md;
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.05);
+}
+
+.home-card-text {
+  @apply text-gray-300 mt-4;
+}
+
+.home-card-title-teal {
+  @apply text-2xl font-bold text-blue-400;
+}
+
+.home-card-title-error {
+  @apply text-2xl font-bold text-red-400 mt-4;
+}
+
+.home-card-loader {
+  @apply animate-spin text-blue-500 mx-auto;
+}
+
+.home-card-error-icon {
+  @apply text-red-500 mx-auto;
 }
 
 .match-wrapper {
   @apply w-full max-w-xl mx-auto;
-  max-height: calc(100vh - 9rem);
 }
 
 .action-bar {
-  @apply flex items-center justify-center z-30 gap-10 mt-8;
+  @apply flex items-center justify-center z-30 gap-6 sm:gap-10 mt-6 sm:mt-8;
 }
 
 .action-btn {
-  @apply w-12 h-12 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-transform duration-200 text-base;
+  @apply w-14 h-14 sm:w-16 sm:h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-200 cursor-pointer;
 }
 
 .action-pass {
-  @apply bg-red-600 text-red-100 ring-4 ring-red-500/20;
+  @apply bg-gradient-to-br from-red-500 to-red-600 text-white;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
 }
 
 .action-pass:hover:not(:disabled) {
-  @apply scale-105;
+  @apply scale-110;
+  box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
 }
 
 .action-like {
-  @apply bg-teal-600 text-teal-100 ring-4 ring-teal-500/20;
+  @apply bg-gradient-to-br from-emerald-500 to-emerald-600 text-white;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
-.action-like:hover:not(:disabled) { @apply scale-105; }
 
-.profile-card-root.zoomed + .action-bar,
-.match-wrapper + .action-bar {
-  @apply mt-6;
+.action-like:hover:not(:disabled) {
+  @apply scale-110;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
 }
 
 @media (max-width: 40rem) {
-  .action-bar { @apply gap-6 mt-4; }
-  .action-btn { @apply w-12 h-12; }
-  .match-wrapper { max-height: calc(100vh - 7.5rem); padding: 0 0.75rem; }
+  .match-wrapper { max-height: calc(100vh - 10rem); padding: 0 0.5rem; }
 }

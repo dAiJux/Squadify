@@ -8,8 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,10 +18,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class JwtTokenProvider {
-
-    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -33,10 +31,12 @@ public class JwtTokenProvider {
     private volatile SecretKey signingKey;
 
     private SecretKey getSigningKey() {
-        if (signingKey != null) return signingKey;
+        if (signingKey != null)
+            return signingKey;
 
         synchronized (this) {
-            if (signingKey != null) return signingKey;
+            if (signingKey != null)
+                return signingKey;
 
             byte[] keyBytes;
             try {
@@ -81,13 +81,13 @@ public class JwtTokenProvider {
             getAllClaimsFromToken(authToken);
             return true;
         } catch (ExpiredJwtException ex) {
-            logger.debug("Token JWT expiré");
+            log.debug("Token JWT expiré");
         } catch (SecurityException ex) {
-            logger.debug("Signature JWT invalide");
+            log.warn("Signature JWT invalide - tentative d'accès non autorisée possible");
         } catch (JwtException ex) {
-            logger.debug("Erreur de validation JWT");
+            log.debug("Erreur de validation JWT: {}", ex.getClass().getSimpleName());
         } catch (Exception ex) {
-            logger.error("Erreur inattendue lors de la validation JWT", ex);
+            log.error("Erreur inattendue lors de la validation JWT");
         }
         return false;
     }

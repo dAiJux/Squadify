@@ -6,6 +6,7 @@ import com.daijux.Squadify.dto.ConversationResponse;
 import com.daijux.Squadify.event.MessageEvent;
 import com.daijux.Squadify.model.User;
 import com.daijux.Squadify.service.ChatService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,13 +16,10 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/chat")
+@RequiredArgsConstructor
 public class ChatController {
 
     private final ChatService chatService;
-
-    public ChatController(ChatService chatService) {
-        this.chatService = chatService;
-    }
 
     @GetMapping("/{matchId}/info")
     public Mono<ConversationResponse> getConversationInfo(
@@ -52,8 +50,7 @@ public class ChatController {
                 user.getId(),
                 request.getReceiverId(),
                 request.getContent(),
-                request.getType()
-        ).then(Mono.just(ResponseEntity.ok().build()));
+                request.getType()).then(Mono.just(ResponseEntity.ok().build()));
     }
 
     @PostMapping("/{matchId}/read")

@@ -1,46 +1,83 @@
 @import "tailwindcss";
 
 .header {
-  @apply bg-transparent w-full;
+  @apply fixed top-0 left-0 right-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/50;
 }
 
 .header__container {
-  @apply max-w-6xl mx-auto relative flex items-center justify-between px-6 pt-10 pb-6;
+  @apply max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 h-16 sm:h-20;
 }
 
-.header__container--home {
-  @apply pb-12;
+.header__left {
+  @apply flex items-center gap-2 sm:gap-4;
 }
 
-.header__left,
-.header__right {
-  @apply flex items-center gap-3 z-10;
-}
-
-.header__center {
-  @apply absolute pt-6 left-0 right-0 top-1/2 -translate-y-1/2 flex justify-center pointer-events-none;
+.header__brand {
+  @apply flex items-center gap-2 sm:gap-3 cursor-pointer;
 }
 
 .header__logo {
-  @apply w-16 h-16 sm:w-20 sm:h-20 pointer-events-auto cursor-pointer object-contain;
+  @apply w-8 h-8 sm:w-10 sm:h-10 object-contain;
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.5));
 }
 
-.header__logo--home {
-  @apply w-28 h-28 sm:w-36 sm:h-36;
+.header__title {
+  @apply text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent hidden sm:block;
+}
+
+.header__nav {
+  @apply hidden md:flex items-center gap-1;
+}
+
+.header__center {
+  @apply flex md:hidden items-center gap-3 absolute left-1/2 -translate-x-1/2;
+}
+
+.header__nav-link {
+  @apply px-3 lg:px-4 py-2 text-sm font-medium cursor-pointer text-gray-400 hover:text-white rounded-lg transition-all duration-200 hover:bg-slate-800/50;
+}
+
+.header__nav-link--active {
+  @apply text-white bg-slate-800/80;
+}
+
+.header__right {
+  @apply flex items-center gap-2 sm:gap-3;
 }
 
 .header__icon-button {
-  @apply p-2 rounded-md flex items-center justify-center hover:bg-slate-800 transition-colors cursor-pointer;
+  @apply p-2 sm:p-2.5 rounded-lg flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800/50 transition-all duration-200 cursor-pointer;
+}
+
+.header__icon-button--active {
+  @apply text-blue-400 bg-blue-500/10;
 }
 
 .header__icon {
-  @apply w-6 h-6 text-gray-200;
+  @apply w-5 h-5 sm:w-6 sm:h-6;
 }
 
-.header__profile-btn {
-  @apply p-0 rounded-full;
+.header__github {
+  @apply flex;
+}
+
+.header__divider {
+  @apply w-px h-6 bg-slate-700;
+}
+
+.header__user-menu {
+  @apply flex items-center gap-2;
 }
 
 .header__avatar {
-  @apply w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-violet-600 text-white flex items-center justify-center font-semibold;
+  @apply w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-semibold text-sm cursor-pointer transition-transform hover:scale-105;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.4);
+}
+
+.header__mobile-menu {
+  @apply md:hidden;
+}
+
+.header__mobile-btn {
+  @apply p-2 rounded-lg text-gray-400 hover:text-white hover:bg-slate-800/50 transition-colors;
 }

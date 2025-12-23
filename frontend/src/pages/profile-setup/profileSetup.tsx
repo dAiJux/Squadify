@@ -40,7 +40,7 @@ const ProfileSetup: React.FC = () => {
     };
 
     try {
-      const response = await fetch(`/api/profiles/setup/${userId}`, {
+      const response = await fetch('/api/profiles/setup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -89,7 +89,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ candidate }) => {
     }
 
     setShowDetails(false);
-    setIsAnimating(false);
 
     const mobileRect = cardRef.current.getBoundingClientRect();
     const targetRect = contentRef.current.getBoundingClientRect();
@@ -99,13 +98,19 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ candidate }) => {
     const translateX = mobileRect.left - targetRect.left;
     const translateY = mobileRect.top - targetRect.top;
 
-    contentRef.current.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-    contentRef.current.style.transformOrigin = 'top left';
-    contentRef.current.style.opacity = '0';
+    requestAnimationFrame(() => {
+      if (contentRef.current) {
+        contentRef.current.style.transition = 'transform 350ms cubic-bezier(0.4, 0, 0.2, 1), opacity 200ms ease-out';
+        contentRef.current.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+        contentRef.current.style.transformOrigin = 'top left';
+        contentRef.current.style.opacity = '0';
+      }
+      setIsAnimating(false);
+    });
 
     setTimeout(() => {
       finishClose();
-    }, 300);
+    }, 350);
   };
 
   const finishClose = () => {

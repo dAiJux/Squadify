@@ -10,8 +10,8 @@ import com.daijux.Squadify.repository.ProfileRepository;
 import com.daijux.Squadify.repository.SwipeRepository;
 import com.daijux.Squadify.repository.UserRepository;
 import com.daijux.Squadify.security.JwtTokenProvider;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,10 +23,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class AuthService {
-
-    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
@@ -35,22 +35,6 @@ public class AuthService {
     private final ReactiveAuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-
-    public AuthService(UserRepository userRepository,
-                       ProfileRepository profileRepository,
-                       MatchRepository matchRepository,
-                       SwipeRepository swipeRepository,
-                       ReactiveAuthenticationManager authenticationManager,
-                       JwtTokenProvider jwtTokenProvider,
-                       PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.profileRepository = profileRepository;
-        this.matchRepository = matchRepository;
-        this.swipeRepository = swipeRepository;
-        this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     public Mono<Map<String, String>> register(RegistrationRequest request) {
         Mono<Boolean> emailExists = userRepository.findByEmail(request.getEmail()).hasElement();
@@ -62,10 +46,12 @@ public class AuthService {
                     boolean isUsernameUsed = tuple.getT2();
 
                     if (isEmailUsed) {
-                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "Cet email est déjà utilisé."));
+                        return Mono
+                                .error(new ResponseStatusException(HttpStatus.CONFLICT, "Cet email est déjà utilisé."));
                     }
                     if (isUsernameUsed) {
-                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT, "Ce nom d'utilisateur est déjà pris."));
+                        return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
+                                "Ce nom d'utilisateur est déjà pris."));
                     }
 
                     User newUser = new User();
@@ -76,15 +62,15 @@ public class AuthService {
                     return userRepository.save(newUser)
                             .map(savedUser -> Map.of("message", "Inscription réussie."))
                             .doOnError(e -> log.error("Erreur lors de l'enregistrement d'un utilisateur"))
-                            .onErrorResume(e -> Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Erreur serveur lors de l'enregistrement du compte.")));
+                            .onErrorResume(e -> Mono.error(new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                    "Erreur serveur lors de l'enregistrement du compte.")));
                 });
     }
 
     public Mono<AuthResponse> login(LoginRequest request) {
         Authentication auth = new UsernamePasswordAuthenticationToken(
                 request.getIdentifier(),
-                request.getPassword()
-        );
+                request.getPassword());
 
         return authenticationManager.authenticate(auth)
                 .flatMap(authenticatedAuth -> {
@@ -99,11 +85,13 @@ public class AuthService {
                             .setupCompleted(userModel.isSetupCompleted())
                             .build());
                 })
-                .onErrorResume(e -> Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiants invalides")));
+                .onErrorResume(e -> Mono
+                        .error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Identifiants invalides")));
     }
 
     public Mono<AuthResponse> validateAndGetUser(String token) {
-        if (!jwtTokenProvider.validateToken(token)) return Mono.empty();
+        if (!jwtTokenProvider.validateToken(token))
+            return Mono.empty();
         String userId = jwtTokenProvider.getUserIdFromToken(token);
         return userRepository.findById(userId)
                 .map(u -> AuthResponse.builder()
@@ -119,7 +107,8 @@ public class AuthService {
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable")))
                 .flatMap(u -> {
                     if (!passwordEncoder.matches(request.getCurrentPassword(), u.getPassword())) {
-                        return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Mot de passe actuel incorrect"));
+                        return Mono.error(
+                                new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Mot de passe actuel incorrect"));
                     }
                     u.setPassword(passwordEncoder.encode(request.getNewPassword()));
                     return userRepository.save(u);
@@ -132,7 +121,8 @@ public class AuthService {
                 .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable")))
                 .flatMap(u -> {
                     if (!passwordEncoder.matches(password, u.getPassword())) {
-                        return Mono.error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect"));
+                        return Mono
+                                .error(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Mot de passe incorrect"));
                     }
 
                     return profileRepository.deleteByUserId(userId)

@@ -26,6 +26,7 @@ const Profile: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [noticeType, setNoticeType] = useState<'success' | 'error'>('success');
 
   const [username, setUsername] = useState(user?.username ?? '');
   const [email, setEmail] = useState(user?.email ?? '');
@@ -48,9 +49,11 @@ const Profile: React.FC = () => {
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [pwdNotice, setPwdNotice] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
   const [activeTab, setActiveTab] = useState<'information' | 'preferences' | 'securite'>('information');
 
@@ -59,7 +62,7 @@ const Profile: React.FC = () => {
       (async () => {
         setLoading(true);
         try {
-          const res = await fetch(`/api/profiles/${user.userId}`, {
+          const res = await fetch('/api/profiles/me', {
             credentials: 'include'
           });
           if (res.ok) {
@@ -95,7 +98,7 @@ const Profile: React.FC = () => {
   const confirmLogout = async () => {
     try {
       await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    } catch {}
+    } catch { }
     dispatch(clearUserData());
     navigate('/');
   };
@@ -133,8 +136,9 @@ const Profile: React.FC = () => {
       schedules,
       playStyle
     };
+
     try {
-      const res = await fetch(`/api/profiles/${user.userId}`, {
+      const res = await fetch('/api/profiles/', {
         method: 'PUT',
         credentials: 'include',
         headers: {
@@ -142,6 +146,7 @@ const Profile: React.FC = () => {
         },
         body: JSON.stringify(payload)
       });
+
       if (res.ok) {
         const saved = await res.json();
         dispatch(setProfileData(saved));
@@ -153,14 +158,17 @@ const Profile: React.FC = () => {
         }));
         savedProfileRef.current = saved;
         setNotice('Sauvegarde effectuée.');
+        setNoticeType('success');
         Object.keys(opts).forEach(k => {
           if ((opts as any)[k]) setEditing(prev => ({ ...prev, [k]: false }));
         });
       } else {
         setNotice('Erreur lors de la sauvegarde.');
+        setNoticeType('error');
       }
     } catch {
       setNotice('Erreur réseau.');
+      setNoticeType('error');
     } finally {
       setSaving(false);
     }
@@ -169,11 +177,11 @@ const Profile: React.FC = () => {
   const changePassword = async () => {
     if (!user?.userId) return;
     if (pwdState.next !== pwdState.confirm) {
-      setNotice('Les nouveaux mots de passe ne correspondent pas.');
+      setPwdNotice({ msg: 'Les nouveaux mots de passe ne correspondent pas.', type: 'error' });
       return;
     }
     setPwdLoading(true);
-    setNotice(null);
+    setPwdNotice(null);
     try {
       const res = await fetch('/api/auth/change-password', {
         method: 'POST',
@@ -183,17 +191,21 @@ const Profile: React.FC = () => {
         },
         body: JSON.stringify({ currentPassword: pwdState.current, newPassword: pwdState.next })
       });
+
       if (res.ok) {
-        setNotice('Mot de passe mis à jour.');
+        setPwdNotice({ msg: 'Mot de passe mis à jour avec succès.', type: 'success' });
         setPwdState({ current: '', next: '', confirm: '' });
-        setEditing(prev => ({ ...prev, security: false }));
+        setTimeout(() => {
+          setShowPasswordModal(false);
+          setPwdNotice(null);
+        }, 1500);
       } else if (res.status === 401) {
-        setNotice('Mot de passe actuel incorrect.');
+        setPwdNotice({ msg: 'Mot de passe actuel incorrect.', type: 'error' });
       } else {
-        setNotice('Erreur lors du changement de mot de passe.');
+        setPwdNotice({ msg: 'Erreur lors du changement de mot de passe.', type: 'error' });
       }
     } catch {
-      setNotice('Erreur réseau.');
+      setPwdNotice({ msg: 'Erreur réseau.', type: 'error' });
     } finally {
       setPwdLoading(false);
     }
@@ -366,31 +378,10 @@ const Profile: React.FC = () => {
             <div className="card-section">
               <h2 className="section-title-inline">Mot de passe</h2>
               <div className="security-block">
-                <p className="muted">Vous pouvez mettre à jour votre mot de passe ci-dessous.</p>
-                {editing.security ? (
-                  <div className="edit-block mt-3">
-                    <div className="form-row">
-                      <label>Mot de passe actuel</label>
-                      <input type="password" value={pwdState.current} onChange={e => setPwdState(prev => ({ ...prev, current: e.target.value }))} />
-                    </div>
-                    <div className="form-row">
-                      <label>Nouveau mot de passe</label>
-                      <input type="password" value={pwdState.next} onChange={e => setPwdState(prev => ({ ...prev, next: e.target.value }))} />
-                    </div>
-                    <div className="form-row">
-                      <label>Confirmer</label>
-                      <input type="password" value={pwdState.confirm} onChange={e => setPwdState(prev => ({ ...prev, confirm: e.target.value }))} />
-                    </div>
-                    <div className="section-controls security-controls-editing">
-                      <button className="btn-small btnPrimary" onClick={changePassword} disabled={pwdLoading}>{pwdLoading ? 'Modification...' : 'Valider'}</button>
-                      <button className="btn-small btnSecondary" onClick={() => resetSection('security')}>Annuler</button>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="section-controls security-controls-default">
-                    <button className="btn-small btnPrimary" onClick={() => setEditing(prev => ({ ...prev, security: true }))}>Modifier le mot de passe</button>
-                  </div>
-                )}
+                <p className="muted">Vous pouvez mettre à jour votre mot de passe à tout moment.</p>
+                <div className="section-controls security-controls-default">
+                  <button className="btn-small btnPrimary" onClick={() => { setPwdState({ current: '', next: '', confirm: '' }); setPwdNotice(null); setShowPasswordModal(true); }}>Modifier le mot de passe</button>
+                </div>
               </div>
             </div>
             <div className="card-section delete-section">
@@ -404,7 +395,7 @@ const Profile: React.FC = () => {
             </div>
           </>
         )}
-        {notice && <div className="notice">{notice}</div>}
+        {notice && <div className={`notice ${noticeType}`}>{notice}</div>}
       </div>
       {showLogoutModal && (
         <div className="modal-overlay">
@@ -445,6 +436,32 @@ const Profile: React.FC = () => {
               <button className="delete-btn delete-btn-confirm" onClick={confirmDeleteAccount} disabled={deleteLoading}>
                 {deleteLoading ? 'Suppression...' : 'Confirmer la suppression'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showPasswordModal && (
+        <div className="modal-overlay">
+          <div className="modal-card">
+            <h3 className="modal-title">Modifier le mot de passe</h3>
+            <div className="modal-form">
+              <div className="form-row">
+                <label>Mot de passe actuel</label>
+                <input type="password" value={pwdState.current} onChange={e => setPwdState(prev => ({ ...prev, current: e.target.value }))} />
+              </div>
+              <div className="form-row">
+                <label>Nouveau mot de passe</label>
+                <input type="password" value={pwdState.next} onChange={e => setPwdState(prev => ({ ...prev, next: e.target.value }))} />
+              </div>
+              <div className="form-row">
+                <label>Confirmer le nouveau mot de passe</label>
+                <input type="password" value={pwdState.confirm} onChange={e => setPwdState(prev => ({ ...prev, confirm: e.target.value }))} />
+              </div>
+              {pwdNotice && <div className={`modal-notice ${pwdNotice.type}`}>{pwdNotice.msg}</div>}
+            </div>
+            <div className="modal-actions">
+              <button className="btn-small btnSecondary" onClick={() => setShowPasswordModal(false)} disabled={pwdLoading}>Annuler</button>
+              <button className="btn-small btnPrimary" onClick={changePassword} disabled={pwdLoading}>{pwdLoading ? 'Modification...' : 'Valider'}</button>
             </div>
           </div>
         </div>

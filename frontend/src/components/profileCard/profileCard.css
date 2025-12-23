@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 .profile-card-root.preview {
-  @apply w-full bg-slate-900/70 backdrop-blur-lg rounded-2xl border border-blue-500/20 shadow-2xl p-6 relative cursor-pointer transition-transform duration-200 ease-in-out flex items-start justify-center overflow-hidden;
-  min-height: 21.25rem;
-  max-height: 32.5rem;
+  @apply w-full bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-slate-700/50 shadow-2xl p-5 sm:p-6 relative cursor-pointer transition-transform duration-200 ease-in-out flex items-start justify-center overflow-hidden;
+  min-height: 20rem;
+  max-height: 30rem;
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.05);
 }
 
 .profile-card-root.preview:active {
@@ -23,36 +24,36 @@
 }
 
 .username {
-  @apply text-2xl sm:text-3xl font-extrabold text-blue-400 mb-1;
+  @apply text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent mb-1;
 }
 
 .avatar {
-  @apply w-24 h-24 sm:w-40 sm:h-40 bg-slate-800 rounded-full flex items-center justify-center text-gray-400 border-4 border-violet-500/40 shadow-lg shrink-0;
+  @apply w-20 h-20 sm:w-28 sm:h-28 lg:w-36 lg:h-36 bg-gradient-to-br from-blue-500 to-violet-600 rounded-full flex items-center justify-center text-white text-2xl sm:text-4xl font-bold shrink-0;
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
 }
 
 .avatar.large {
-  @apply w-28 h-28 sm:w-40 sm:h-40;
+  @apply w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40;
 }
 
 .card-section {
-  @apply mt-5 w-full shrink-0;
+  @apply mt-4 sm:mt-5 w-full shrink-0;
 }
 
 .section-title {
-  @apply text-base sm:text-lg font-semibold text-teal-300 flex items-center gap-2 mb-2;
+  @apply text-sm sm:text-base font-semibold text-blue-400 flex items-center gap-2 mb-2;
 }
 
 .chips {
-  @apply flex flex-wrap gap-2;
+  @apply flex flex-wrap gap-1.5 sm:gap-2 justify-start;
 }
 
 .chip {
-  @apply px-3 py-1 rounded-full bg-violet-600/20 text-violet-200 text-sm border border-violet-500/30;
+  @apply px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-slate-800/80 text-gray-300 text-xs sm:text-sm border border-slate-700/50;
 }
 
 .card-divider {
-  @apply w-full transition-all duration-300 ease-out h-px opacity-0 my-0;
-  background-color: rgb(51 65 85 / 0.3);
+  @apply w-full transition-all duration-300 ease-out h-px opacity-0 my-0 bg-slate-700/50;
   transform: scaleX(0);
 }
 
@@ -74,7 +75,7 @@
 }
 
 .detail-title {
-  @apply text-sm font-semibold text-violet-300 flex items-center gap-2 mb-1;
+  @apply text-sm font-semibold text-violet-400 flex items-center gap-2 mb-1;
 }
 
 .detail-list {
@@ -90,31 +91,33 @@
 }
 
 .zoom-overlay.active {
-  @apply bg-black/60;
+  @apply bg-black/70 backdrop-blur-sm;
 }
 
 .zoom-clone {
-  @apply bg-slate-900 rounded-2xl p-5 shadow-2xl border border-blue-500/20 overflow-y-auto w-full max-w-4xl relative;
+  @apply bg-slate-900/95 backdrop-blur-xl rounded-2xl p-5 sm:p-6 shadow-2xl border border-slate-700/50 overflow-y-auto w-full max-w-3xl relative;
   max-height: 90vh;
   will-change: transform, opacity;
-  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease;
+  transition: transform 350ms cubic-bezier(0.4, 0, 0.2, 1), opacity 250ms ease-out;
+  box-shadow: 0 0 60px rgba(59, 130, 246, 0.1);
 }
 
 .profile-close-btn {
-  @apply absolute top-3 right-3 z-50 p-2 rounded-md bg-slate-800/60 hover:bg-slate-800 text-gray-200 transition-colors cursor-pointer;
+  @apply absolute top-3 right-3 z-50 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-gray-300 hover:text-white transition-all cursor-pointer;
 }
 
-@media (max-width: 40rem) {
+@media (max-width: 640px) {
   .profile-card-root.preview {
-    min-height: 18.75rem;
+    min-height: 16rem;
+    @apply p-4;
   }
 
   .avatar {
-    @apply w-20 h-20;
+    @apply w-16 h-16 text-xl;
   }
 
   .username {
-    @apply text-2xl;
+    @apply text-lg;
   }
 
   .zoom-clone {

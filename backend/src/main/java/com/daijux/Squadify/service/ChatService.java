@@ -8,8 +8,7 @@ import com.daijux.Squadify.model.Message;
 import com.daijux.Squadify.repository.MatchRepository;
 import com.daijux.Squadify.repository.MessageRepository;
 import com.daijux.Squadify.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -22,10 +21,9 @@ import java.time.ZoneId;
 import java.util.Comparator;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 public class ChatService {
-
-    private static final Logger log = LoggerFactory.getLogger(ChatService.class);
 
     private final MessageRepository messageRepository;
     private final MatchRepository matchRepository;
@@ -34,9 +32,9 @@ public class ChatService {
     private final Sinks.Many<MessageEvent> chatSink;
 
     public ChatService(MessageRepository messageRepository,
-                       MatchRepository matchRepository,
-                       UserRepository userRepository,
-                       ChatProducer kafkaProducer) {
+            MatchRepository matchRepository,
+            UserRepository userRepository,
+            ChatProducer kafkaProducer) {
         this.messageRepository = messageRepository;
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
@@ -77,8 +75,10 @@ public class ChatService {
                     String matchId = generateMatchId(match.getUser1Id(), match.getUser2Id());
                     return userRepository.findById(otherId)
                             .flatMap(otherUser -> {
-                                Mono<Message> lastMsgMono = messageRepository.findFirstByMatchIdOrderByTimestampDesc(matchId);
-                                Mono<Long> unreadMono = messageRepository.countByMatchIdAndReceiverIdAndReadFalse(matchId, userId);
+                                Mono<Message> lastMsgMono = messageRepository
+                                        .findFirstByMatchIdOrderByTimestampDesc(matchId);
+                                Mono<Long> unreadMono = messageRepository
+                                        .countByMatchIdAndReceiverIdAndReadFalse(matchId, userId);
                                 return Mono.zip(lastMsgMono.defaultIfEmpty(new Message()), unreadMono)
                                         .map(t -> ConversationResponse.builder()
                                                 .matchId(matchId)
@@ -94,8 +94,10 @@ public class ChatService {
                 .sort((c1, c2) -> {
                     LocalDateTime t1 = c1.getLastMessageTime() != null ? c1.getLastMessageTime() : c1.getMatchDate();
                     LocalDateTime t2 = c2.getLastMessageTime() != null ? c2.getLastMessageTime() : c2.getMatchDate();
-                    if (t1 == null) return 1;
-                    if (t2 == null) return -1;
+                    if (t1 == null)
+                        return 1;
+                    if (t2 == null)
+                        return -1;
                     return t2.compareTo(t1);
                 });
     }
@@ -122,7 +124,8 @@ public class ChatService {
                 .doOnNext(e -> log.debug("Diffusion d'un événement via SSE"));
     }
 
-    public Mono<Void> sendMessage(String matchId, String senderId, String receiverId, String content, MessageEvent.MessageType type) {
+    public Mono<Void> sendMessage(String matchId, String senderId, String receiverId, String content,
+            MessageEvent.MessageType type) {
         return checkMatchAccess(matchId, senderId)
                 .then(Mono.fromRunnable(() -> {
                     MessageEvent event = MessageEvent.builder()

@@ -13,6 +13,7 @@ import Profile from './pages/profile/profile.tsx';
 import NotFound from './pages/not-found/notFound.tsx';
 import AuthGuard from './guards/authGuard.tsx';
 import Header from './components/header/header.tsx';
+import Footer from './components/footer/footer.tsx';
 import ChatLobby from './pages/chat/lobby/lobby.tsx';
 import Conversation from './pages/chat/conversation/conversation.tsx';
 
@@ -27,7 +28,7 @@ const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) =
           const data = await res.json();
           dispatch(setUserData(data));
           if (data.setupCompleted && data.userId) {
-            const profileRes = await fetch(`/api/profiles/${data.userId}`, {
+            const profileRes = await fetch('/api/profiles/me', {
               credentials: 'include'
             });
             if (profileRes.ok) {
@@ -109,6 +110,7 @@ const App = () => {
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <Footer />
         </AppInitializer>
       </BrowserRouter>
     </Provider>

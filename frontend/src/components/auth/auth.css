@@ -1,23 +1,24 @@
 @import "tailwindcss";
 
 .modal-overlay {
-  @apply fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-out;
+  @apply fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm transition-opacity duration-300 ease-out px-4;
 }
 
 .modal-content {
-  @apply relative z-10 flex flex-col w-full max-w-md mx-4 bg-slate-900/80 backdrop-blur-xl border border-blue-500/30 rounded-2xl shadow-2xl shadow-blue-500/10 transition-all duration-300 ease-out;
+  @apply relative z-10 flex flex-col w-full max-w-md bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-2xl shadow-2xl transition-all duration-300 ease-out;
+  box-shadow: 0 0 60px rgba(59, 130, 246, 0.1);
 }
 
 .modal-header-flow {
-  @apply flex justify-between items-center border-b border-slate-700;
+  @apply flex justify-between items-center border-b border-slate-800/50;
 }
 
 .modal-close-btn-flow {
-  @apply p-3 text-gray-500 hover:text-white transition-colors;
+  @apply p-3 text-gray-500 hover:text-white transition-colors cursor-pointer;
 }
 
 .modal-close-icon {
-  @apply w-6 h-6;
+  @apply w-5 h-5;
 }
 
 .modal-tabs {
@@ -25,41 +26,47 @@
 }
 
 .modal-tab {
-  @apply flex-1 py-3 text-center font-medium rounded-t-lg cursor-pointer transition-colors;
+  @apply flex-1 py-3.5 text-center font-medium rounded-t-xl cursor-pointer transition-all text-sm;
 }
 
 .modal-tab-active {
-  @apply bg-slate-800 text-white;
+  @apply bg-slate-800/80 text-white;
 }
 
 .modal-tab-inactive {
-  @apply text-gray-400 hover:bg-slate-800/50;
+  @apply text-gray-400 hover:bg-slate-800/30 hover:text-gray-200;
 }
 
 .modal-form-container {
-  @apply p-8 sm:p-9;
+  @apply p-6 sm:p-8;
 }
 
 .modal-form {
-  @apply flex flex-col gap-5;
+  @apply flex flex-col gap-4;
 }
 
 .modal-title {
-  @apply text-xl font-bold text-white text-center mb-2;
+  @apply text-xl font-bold text-white text-center mb-4;
 }
 
 .modal-label {
-  @apply block text-sm font-medium text-gray-300 mb-2;
+  @apply block text-sm font-medium text-gray-400 mb-2;
 }
 
 .modal-input {
-  @apply w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-colors;
+  @apply w-full px-4 py-3 bg-slate-800/80 border border-slate-700 rounded-xl text-gray-200 placeholder-gray-500 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all;
 }
 
 .modal-link {
-  @apply text-sm text-blue-400 hover:text-blue-300 text-right -mt-2;
+  @apply text-sm text-blue-400 hover:text-blue-300 text-right -mt-1 cursor-pointer;
 }
 
 .modal-btn {
-  @apply w-full py-3 px-4 rounded-lg text-white font-semibold transition-colors mt-3 bg-blue-600 hover:bg-blue-500;
+  @apply w-full py-3.5 px-4 rounded-xl text-white font-semibold transition-all mt-2 bg-gradient-to-r from-blue-500 to-blue-600 cursor-pointer;
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+}
+
+.modal-btn:hover {
+  @apply from-blue-400 to-blue-500;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.5);
 }

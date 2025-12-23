@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../store/store';
 import ProfileCard from '../../components/profileCard/profileCard';
 import { Loader2, ZapOff, Heart, X as XIcon, MessageCircle, PartyPopper } from 'lucide-react';
@@ -22,13 +23,14 @@ interface SwipeResponse {
 }
 
 const Matchmaking: React.FC = () => {
+  const navigate = useNavigate();
   const userId = useSelector((state: RootState) => state.user.data?.userId);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSwiping, setIsSwiping] = useState(false);
   const [swipeDirection, setSwipeDirection] = useState<SwipeType | null>(null);
-  const [matchPopup, setMatchPopup] = useState<{ show: boolean, username: string }>({ show: false, username: '' });
+  const [matchPopup, setMatchPopup] = useState<{ show: boolean, username: string, matchId: string | null }>({ show: false, username: '', matchId: null });
   const [error, setError] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const currentCandidate = candidates[currentIndex];
@@ -114,7 +116,7 @@ const Matchmaking: React.FC = () => {
         const data: SwipeResponse = await res.json();
 
         if (data.match) {
-          setMatchPopup({ show: true, username: targetUsername });
+          setMatchPopup({ show: true, username: targetUsername, matchId: data.matchId || null });
         } else {
           handleNextCandidate();
         }
@@ -130,16 +132,24 @@ const Matchmaking: React.FC = () => {
   }, [currentCandidate, isSwiping, handleNextCandidate]);
 
   const closeMatchPopup = () => {
-    setMatchPopup({ show: false, username: '' });
+    setMatchPopup({ show: false, username: '', matchId: null });
     handleNextCandidate();
+  };
+
+  const goToChat = () => {
+    if (matchPopup.matchId) {
+      navigate(`/chat/${matchPopup.matchId}`);
+    } else {
+      closeMatchPopup();
+    }
   };
 
   if (isLoading && candidates.length === 0) {
     return (
-      <div className="home-container">
+      <div className="home-container matchmaking-empty-state">
         <div className="home-card">
-          <Loader2 className="animate-spin text-blue-500 mx-auto" size={36} />
-          <p className="text-lg mt-4 text-gray-300">Recherche de coéquipiers...</p>
+          <Loader2 className="home-card-loader" size={36} />
+          <p className="home-card-text">Recherche de coéquipiers...</p>
         </div>
       </div>
     );
@@ -147,10 +157,10 @@ const Matchmaking: React.FC = () => {
 
   if (error) {
     return (
-      <div className="home-container">
+      <div className="home-container matchmaking-empty-state">
         <div className="home-card">
-          <ZapOff className="text-red-500 mx-auto" size={36} />
-          <h2 className="text-2xl font-bold text-red-400 mt-4">Erreur de Connexion</h2>
+          <ZapOff className="home-card-error-icon" size={36} />
+          <h2 className="home-card-title-error">Erreur de Connexion</h2>
           <p className="home-card-text">{error}</p>
           <button className="btn btnPrimary mt-4" onClick={() => fetchCandidates(false)}>
             Tenter de recharger
@@ -160,11 +170,21 @@ const Matchmaking: React.FC = () => {
     );
   }
 
-  if (!currentCandidate && !hasMore && !isLoading) {
+  if (!currentCandidate && isLoading) {
     return (
-      <div className="home-container">
+      <div className="home-container matchmaking-empty-state">
+        <div className="home-card">
+          <Loader2 className="home-card-loader" size={36} />
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentCandidate) {
+    return (
+      <div className="home-container matchmaking-empty-state">
         <div className="home-card anim-fade-in">
-          <h2 className="text-2xl font-bold text-teal-400">👋 C'est tout pour l'instant !</h2>
+          <h2 className="home-card-title-teal">👋 C'est tout pour l'instant !</h2>
           <p className="home-card-text">Vous avez swipé tous les coéquipiers potentiels.</p>
           <button className="btn btnPrimary mt-4" onClick={() => fetchCandidates(false)}>
             Rechercher de nouveaux profils
@@ -174,87 +194,70 @@ const Matchmaking: React.FC = () => {
     );
   }
 
-  if (!currentCandidate && isLoading) {
-     return (
-        <div className="home-container">
-            <div className="home-card">
-             <Loader2 className="animate-spin text-blue-500 mx-auto" size={36} />
-            </div>
-        </div>
-     );
-  }
-
   return (
-    <div className="home-container">
+    <div className="matchmaking-main">
       {matchPopup.show && (
         <div className="match-popup-overlay">
           <div className="match-popup-content">
-            <PartyPopper className="text-yellow-400 mx-auto w-16 h-16 mb-4 animate-bounce" />
-            <h2 className="text-3xl font-bold text-white mb-2">IT'S A MATCH !</h2>
-            <p className="text-gray-300 mb-6">
-              Tu vas pouvoir jouer avec <span className="text-teal-400 font-bold">{matchPopup.username}</span>.
+            <PartyPopper className="match-popup-icon" />
+            <h2 className="match-popup-title">IT'S A MATCH !</h2>
+            <p className="match-popup-text">
+              Tu vas pouvoir jouer avec <span className="match-popup-username">{matchPopup.username}</span>.
             </p>
-            <div className="flex flex-col gap-3">
-              <button
-                className="btn bg-teal-600 hover:bg-teal-700 text-white w-full flex items-center justify-center gap-2 py-3 rounded-lg font-semibold"
-                onClick={() => {
-                    console.log("Redirect to chat");
-                    closeMatchPopup();
-                }}
-              >
+            <div className="match-popup-actions">
+              <button className="match-popup-chat-btn" onClick={goToChat}>
                 <MessageCircle size={20} />
                 Envoyer un message
               </button>
-              <button
-                className="text-gray-400 hover:text-white text-sm mt-2 underline"
-                onClick={closeMatchPopup}
-              >
+              <button className="match-popup-continue-btn" onClick={closeMatchPopup}>
                 Continuer à swiper
               </button>
             </div>
           </div>
         </div>
       )}
-      <div className="match-wrapper">
-        {currentCandidate && (
-          <div className={
-            swipeDirection === 'PASS' ? 'swipe-exit-left' :
-            swipeDirection === 'LIKE' ? 'swipe-exit-right' : ''
-          }>
-            <ProfileCard
-              candidate={currentCandidate}
-              onSwipe={() => {}}
-              isSwiping={isSwiping}
-            />
+      <div className="matchmaking-content">
+        <div className="match-wrapper">
+          {currentCandidate && (
+            <div className={
+              swipeDirection === 'PASS' ? 'swipe-exit-left' :
+                swipeDirection === 'LIKE' ? 'swipe-exit-right' : ''
+            }>
+              <ProfileCard
+                candidate={currentCandidate}
+                onSwipe={() => { }}
+                isSwiping={isSwiping}
+              />
+            </div>
+          )}
+        </div>
+        {currentCandidate && !matchPopup.show && (
+          <div className="action-bar" role="toolbar" aria-label="Actions de swipe">
+            <button
+              className="action-btn action-pass"
+              onClick={(e) => {
+                e.stopPropagation();
+                doSwipe('PASS');
+              }}
+              disabled={isSwiping}
+              aria-label="Pass"
+            >
+              <XIcon size={18} />
+            </button>
+            <button
+              className="action-btn action-like"
+              onClick={(e) => {
+                e.stopPropagation();
+                doSwipe('LIKE');
+              }}
+              disabled={isSwiping}
+              aria-label="Like"
+            >
+              <Heart size={18} />
+            </button>
           </div>
         )}
       </div>
-      {currentCandidate && !matchPopup.show && (
-        <div className="action-bar" role="toolbar" aria-label="Actions de swipe">
-          <button
-            className="action-btn action-pass"
-            onClick={(e) => {
-              e.stopPropagation();
-              doSwipe('PASS');
-            }}
-            disabled={isSwiping}
-            aria-label="Pass"
-          >
-            <XIcon size={18} />
-          </button>
-          <button
-            className="action-btn action-like"
-            onClick={(e) => {
-              e.stopPropagation();
-              doSwipe('LIKE');
-            }}
-            disabled={isSwiping}
-            aria-label="Like"
-          >
-            <Heart size={18} />
-          </button>
-        </div>
-      )}
     </div>
   );
 };

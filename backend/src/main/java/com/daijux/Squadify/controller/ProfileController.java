@@ -2,8 +2,10 @@ package com.daijux.Squadify.controller;
 
 import com.daijux.Squadify.dto.ProfileRequest;
 import com.daijux.Squadify.dto.ProfileResponse;
+import com.daijux.Squadify.model.Profile;
 import com.daijux.Squadify.model.User;
 import com.daijux.Squadify.service.ProfileService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -12,38 +14,39 @@ import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/profiles")
+@RequiredArgsConstructor
 public class ProfileController {
 
     private final ProfileService profileService;
 
-    public ProfileController(ProfileService profileService) {
-        this.profileService = profileService;
-    }
-
-    @PostMapping("/setup/{userId}")
-    public Mono<ResponseEntity<com.daijux.Squadify.model.Profile>> setupProfile(@PathVariable String userId, @RequestBody ProfileRequest request) {
-        return profileService.createOrUpdateProfile(userId, request)
+    @PostMapping("/setup")
+    public Mono<ResponseEntity<Profile>> setupProfile(@RequestBody ProfileRequest request,
+            @AuthenticationPrincipal User user) {
+        return profileService.createOrUpdateProfile(user.getId(), request)
                 .map(ResponseEntity::ok);
     }
 
-    @GetMapping("/{userId}")
-    public Mono<ResponseEntity<ProfileResponse>> getProfile(@PathVariable String userId) {
-        return profileService.getProfileByUserId(userId)
+    @GetMapping("/me")
+    public Mono<ResponseEntity<ProfileResponse>> getMyProfile(@AuthenticationPrincipal User user) {
+        return profileService.getProfileByUserId(user.getId())
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{userId}")
+    @GetMapping("/view/{matchId}")
+    public Mono<ResponseEntity<ProfileResponse>> viewMatchProfile(
+            @PathVariable String matchId,
+            @AuthenticationPrincipal User user) {
+        return profileService.getProfileByMatchId(matchId, user.getId())
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/")
     public Mono<ResponseEntity<ProfileResponse>> updateProfile(
-            @PathVariable String userId,
             @RequestBody ProfileRequest request,
             @AuthenticationPrincipal User user) {
-
-        if (!user.getId().equals(userId)) {
-            return Mono.just(ResponseEntity.status(HttpStatus.FORBIDDEN).build());
-        }
-
-        return profileService.updateFullProfile(userId, request)
+        return profileService.updateFullProfile(user.getId(), request)
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.CONFLICT).build()));
     }

@@ -53,7 +53,7 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
 
         onClose();
         if (data.setupCompleted) {
-          const profileRes = await fetch(`/api/profiles/${data.userId}`, { credentials: 'include' });
+          const profileRes = await fetch('/api/profiles/me', { credentials: 'include' });
           if (profileRes.ok) {
             const profileData = await profileRes.json();
             dispatch(setProfileData(profileData));

@@ -6,13 +6,18 @@ services:
       - 'MONGO_INITDB_DATABASE=${MONGO_DB_NAME}'
       - 'MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}'
       - 'MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}'
-    env_file:
-      - .env
     ports:
       - '27017:27017'
     volumes:
       - mongo-data:/data/db
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      start_period: 15s
+      start_interval: 5s
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   zookeeper:
     image: 'confluentinc/cp-zookeeper:7.6.0'
@@ -27,7 +32,7 @@ services:
       - zookeeper-data:/var/lib/zookeeper/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "sh", "-c", "nc -z localhost 2181 || exit 1"]
+      test: ["CMD", "sh", "-c", "nc -z localhost 2181"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -36,7 +41,8 @@ services:
     image: 'confluentinc/cp-kafka:7.6.0'
     container_name: kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - '9092:9092'
       - '29092:29092'
@@ -55,6 +61,13 @@ services:
     command: >
       sh -c "chown -R 1000:1000 /var/lib/kafka || true &&
              /etc/confluent/docker/run"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics --list --bootstrap-server localhost:9092 || exit 1"]
+      start_period: 30s
+      start_interval: 5s
+      interval: 15s
+      timeout: 10s
+      retries: 3
 
   squadify-app:
     build:
@@ -62,8 +75,12 @@ services:
       dockerfile: Dockerfile
     container_name: squadify-app
     depends_on:
-      - mongodb
-      - kafka
+      mongodb:
+        condition: service_healthy
+        restart: true
+      kafka:
+        condition: service_healthy
+        restart: true
     ports:
       - '8080:8080'
     env_file:

@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+.footer {
+  @apply fixed bottom-0 left-0 right-0 w-full py-3 sm:py-4 z-40;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.8), transparent);
+}
+
+.footer__container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between;
+}
+
+.footer__links {
+  @apply flex items-center gap-3 sm:gap-4 flex-1;
+}
+
+.footer__spacer {
+  @apply flex-1;
+}
+
+.footer__icon-link {
+  @apply p-2 rounded-lg text-gray-500 transition-all duration-300;
+}
+
+.footer__icon-link:hover {
+  @apply text-white;
+  background: rgba(30, 41, 59, 0.6);
+}
+
+.footer__icon-link:hover .footer__icon {
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+.footer__linkedin:hover {
+  @apply text-blue-400;
+}
+
+.footer__icon {
+  @apply w-5 h-5;
+}
+
+.footer__legal {
+  @apply text-xs sm:text-sm text-gray-500 hover:text-gray-300 transition-colors;
+}
