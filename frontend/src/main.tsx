@@ -11,6 +11,7 @@ import ProfileSetup from './pages/profile-setup/profileSetup.tsx';
 import Matchmaking from './pages/matchmaking/matchmaking.tsx';
 import Profile from './pages/profile/profile.tsx';
 import NotFound from './pages/not-found/notFound.tsx';
+import Legal from './pages/legal/legal.tsx';
 import AuthGuard from './guards/authGuard.tsx';
 import Header from './components/header/header.tsx';
 import Footer from './components/footer/footer.tsx';
@@ -26,19 +27,19 @@ const AppInitializer = ({ children }: { children: ReactNode }) => {
         const res = await fetch('/api/auth/me', { credentials: 'include' });
         if (res.ok) {
           const data = await res.json();
-          dispatch(setUserData(data));
-          if (data.setupCompleted && data.userId) {
-            const profileRes = await fetch('/api/profiles/me', {
-              credentials: 'include'
-            });
-            if (profileRes.ok) {
-              const profileData = await profileRes.json();
-              dispatch(setProfileData(profileData));
+          if (data.authenticated) {
+            dispatch(setUserData(data));
+            if (data.setupCompleted && data.userId) {
+              const profileRes = await fetch('/api/profiles/me', {
+                credentials: 'include'
+              });
+              if (profileRes.ok) {
+                const profileData = await profileRes.json();
+                dispatch(setProfileData(profileData));
+              }
             }
           }
         }
-      } catch (error) {
-        console.error('Erreur lors de l\'initialisation de l\'authentification:', error);
       } finally {
         setIsInitialized(true);
       }
@@ -108,6 +109,7 @@ const App = () => {
                 </AuthGuard>
               }
             />
+            <Route path="/mentions-legales" element={<Legal />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Footer />

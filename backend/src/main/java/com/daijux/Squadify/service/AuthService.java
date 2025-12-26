@@ -74,6 +74,7 @@ public class AuthService {
                     String token = jwtTokenProvider.generateToken(userModel);
 
                     return Mono.just(AuthResponse.builder()
+                            .authenticated(true)
                             .token(token)
                             .userId(userModel.getId())
                             .username(userModel.getUsername())
@@ -91,6 +92,7 @@ public class AuthService {
         String userId = jwtTokenProvider.getUserIdFromToken(token);
         return userRepository.findById(userId)
                 .map(u -> AuthResponse.builder()
+                        .authenticated(true)
                         .userId(u.getId())
                         .username(u.getUsername())
                         .email(u.getEmail())

@@ -54,11 +54,13 @@ public class AuthController {
         public Mono<ResponseEntity<AuthResponse>> me(
                         @CookieValue(name = "squadify_token", required = false) String token) {
                 if (token == null) {
-                        return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+                        return Mono.just(ResponseEntity.ok(
+                                        AuthResponse.builder().authenticated(false).build()));
                 }
                 return authService.validateAndGetUser(token)
                                 .map(ResponseEntity::ok)
-                                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+                                .defaultIfEmpty(ResponseEntity.ok(
+                                                AuthResponse.builder().authenticated(false).build()));
         }
 
         @PostMapping("/logout")
