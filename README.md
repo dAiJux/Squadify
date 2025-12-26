@@ -33,7 +33,7 @@ Squadify est une application de démonstration développée en solo pour illustr
 - **Maven** pour la gestion des dépendances
 
 ### Frontend
-- **React 18** avec hooks modernes
+- **React 19** avec hooks modernes
 - **Vite** pour un build rapide
 - **React Router** pour la navigation
 - **Tailwind** pour l'interface responsive et moderne
