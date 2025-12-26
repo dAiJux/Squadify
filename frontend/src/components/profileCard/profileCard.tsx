@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { X, Gamepad2, Clock, Swords, User } from 'lucide-react';
 import './profileCard.css';
@@ -14,12 +14,8 @@ interface ProfileResponse {
   playStyle: string;
 }
 
-type SwipeType = 'LIKE' | 'PASS';
-
 interface ProfileCardProps {
   candidate: ProfileResponse;
-  onSwipe?: (type: SwipeType) => void;
-  isSwiping?: boolean;
 }
 
 const mapToLabel = (id: string | null | undefined, list: { id: string; label: string }[]) => {
@@ -31,7 +27,7 @@ const mapToLabel = (id: string | null | undefined, list: { id: string; label: st
 const mapIdsToLabels = (ids: string[] = [], list: { id: string; label: string }[]) =>
   ids.map(id => (list.find(item => item.id === id)?.label ?? id));
 
-const ProfileCard: React.FC<ProfileCardProps> = ({ candidate }) => {
+const ProfileCard = ({ candidate }: ProfileCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);

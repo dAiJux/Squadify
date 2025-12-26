@@ -45,13 +45,9 @@ public class AuthService {
                     boolean isEmailUsed = tuple.getT1();
                     boolean isUsernameUsed = tuple.getT2();
 
-                    if (isEmailUsed) {
-                        return Mono
-                                .error(new ResponseStatusException(HttpStatus.CONFLICT, "Cet email est déjà utilisé."));
-                    }
-                    if (isUsernameUsed) {
+                    if (isEmailUsed || isUsernameUsed) {
                         return Mono.error(new ResponseStatusException(HttpStatus.CONFLICT,
-                                "Ce nom d'utilisateur est déjà pris."));
+                                "Cet email ou nom d'utilisateur est déjà utilisé."));
                     }
 
                     User newUser = new User();

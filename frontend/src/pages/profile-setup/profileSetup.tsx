@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState, Dispatch, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -7,7 +7,7 @@ import { setProfileData } from '../../store/profile';
 import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '../../data/gameOptions';
 import './profileSetup.css';
 
-const ProfileSetup: React.FC = () => {
+const ProfileSetup = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userId = useSelector((state: RootState) => state.user.data?.userId);
@@ -17,7 +17,7 @@ const ProfileSetup: React.FC = () => {
   const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const toggleSelection = (id: string, list: string[], setList: React.Dispatch<React.SetStateAction<string[]>>) => {
+  const toggleSelection = (id: string, list: string[], setList: Dispatch<SetStateAction<string[]>>) => {
     if (list.includes(id)) {
       setList(list.filter(item => item !== id));
     } else {

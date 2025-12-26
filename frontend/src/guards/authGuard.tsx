@@ -1,14 +1,14 @@
-import React, { useEffect } from 'react';
+import { useEffect, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 
 interface AuthGuardProps {
-  children: React.ReactNode;
+  children: ReactNode;
   requireSetup?: boolean;
 }
 
-const AuthGuard: React.FC<AuthGuardProps> = ({ children, requireSetup = true }) => {
+const AuthGuard = ({ children, requireSetup = true }: AuthGuardProps) => {
   const navigate = useNavigate();
   const location = useLocation();
 

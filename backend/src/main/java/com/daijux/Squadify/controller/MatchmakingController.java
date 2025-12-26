@@ -5,6 +5,7 @@ import com.daijux.Squadify.dto.SwipeRequest;
 import com.daijux.Squadify.dto.SwipeResponse;
 import com.daijux.Squadify.model.User;
 import com.daijux.Squadify.service.MatchmakingService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,12 +33,8 @@ public class MatchmakingController {
 
     @PostMapping("/swipe")
     public Mono<ResponseEntity<SwipeResponse>> swipe(
-            @RequestBody SwipeRequest request,
+            @Valid @RequestBody SwipeRequest request,
             @AuthenticationPrincipal User user) {
-        if (request == null || request.getTargetUserId() == null || request.getType() == null) {
-            return Mono.just(ResponseEntity.badRequest().build());
-        }
-
         return matchmakingService.processSwipe(user.getId(), request.getTargetUserId(), request.getType())
                 .map(ResponseEntity::ok)
                 .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()));

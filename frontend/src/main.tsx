@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, StrictMode, ReactNode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Provider, useDispatch } from 'react-redux';
@@ -17,7 +17,7 @@ import Footer from './components/footer/footer.tsx';
 import ChatLobby from './pages/chat/lobby/lobby.tsx';
 import Conversation from './pages/chat/conversation/conversation.tsx';
 
-const AppInitializer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AppInitializer = ({ children }: { children: ReactNode }) => {
   const dispatch = useDispatch();
   const [isInitialized, setIsInitialized] = useState(false);
   useEffect(() => {
@@ -120,9 +120,9 @@ const App = () => {
 const rootElement = document.getElementById('app');
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(
-    <React.StrictMode>
+    <StrictMode>
       <App />
-    </React.StrictMode>
+    </StrictMode>
   );
 } else {
   console.error("L'élément racine avec l'ID 'app' n'a pas été trouvé dans le DOM.");

@@ -3,18 +3,18 @@ FROM maven:3.9-eclipse-temurin-21 AS builder
 WORKDIR /app
 
 COPY backend/pom.xml ./backend/
-COPY frontend/package.json ./frontend/
 
 WORKDIR /app/backend
-RUN mvn dependency:go-offline -B
+RUN --mount=type=cache,target=/root/.m2 mvn dependency:go-offline -B
 
 WORKDIR /app
-COPY . .
+COPY backend/src ./backend/src
+COPY frontend ./frontend
 
 RUN rm -f frontend/package-lock.json
 
 WORKDIR /app/backend
-RUN mvn clean package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 mvn package -DskipTests
 
 FROM eclipse-temurin:21-jre-alpine
 

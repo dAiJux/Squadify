@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -12,8 +12,8 @@ const Home = () => {
   const isAuthenticated = useSelector((state: RootState) => state.user.isAuthenticated);
   const setupCompleted = useSelector((state: RootState) => state.user.data?.setupCompleted);
 
-  const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const [modalTab, setModalTab] = React.useState<'login' | 'register'>('login');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalTab, setModalTab] = useState<'login' | 'register'>('login');
 
   useEffect(() => {
     if (isAuthenticated) {

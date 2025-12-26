@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, Dispatch, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../store/store';
@@ -11,12 +11,12 @@ import './profile.css';
 const mapIdsToLabels = (ids: string[] = [], list: { id: string; label: string }[]) =>
   ids.map(id => (list.find(item => item.id === id)?.label ?? id));
 
-const toggleSelection = (id: string, list: string[], setList: React.Dispatch<React.SetStateAction<string[]>>) => {
+const toggleSelection = (id: string, list: string[], setList: Dispatch<SetStateAction<string[]>>) => {
   if (list.includes(id)) setList(list.filter(item => item !== id));
   else setList([...list, id]);
 };
 
-const Profile: React.FC = () => {
+const Profile = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((s: RootState) => s.user.data);
@@ -442,27 +442,27 @@ const Profile: React.FC = () => {
       )}
       {showPasswordModal && (
         <div className="modal-overlay">
-          <div className="modal-card">
+          <div className="modal-card modal-card-password">
             <h3 className="modal-title">Modifier le mot de passe</h3>
             <div className="modal-form">
               <div className="form-row">
-                <label>Mot de passe actuel</label>
+                <label className="text-left">Mot de passe actuel</label>
                 <input type="password" value={pwdState.current} onChange={e => setPwdState(prev => ({ ...prev, current: e.target.value }))} />
               </div>
               <div className="form-row">
-                <label>Nouveau mot de passe</label>
+                <label className="text-left">Nouveau mot de passe</label>
                 <input type="password" value={pwdState.next} onChange={e => setPwdState(prev => ({ ...prev, next: e.target.value }))} />
               </div>
               <div className="form-row">
-                <label>Confirmer le nouveau mot de passe</label>
+                <label className="text-left">Confirmer le nouveau mot de passe</label>
                 <input type="password" value={pwdState.confirm} onChange={e => setPwdState(prev => ({ ...prev, confirm: e.target.value }))} />
               </div>
-              {pwdNotice && <div className={`modal-notice ${pwdNotice.type}`}>{pwdNotice.msg}</div>}
             </div>
             <div className="modal-actions">
               <button className="btn-small btnSecondary" onClick={() => setShowPasswordModal(false)} disabled={pwdLoading}>Annuler</button>
               <button className="btn-small btnPrimary" onClick={changePassword} disabled={pwdLoading}>{pwdLoading ? 'Modification...' : 'Valider'}</button>
             </div>
+            {pwdNotice && <div className={`modal-notice-floating ${pwdNotice.type}`}>{pwdNotice.msg}</div>}
           </div>
         </div>
       )}

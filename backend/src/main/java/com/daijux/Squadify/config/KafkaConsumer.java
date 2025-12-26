@@ -1,8 +1,6 @@
 package com.daijux.Squadify.config;
 
 import com.daijux.Squadify.event.MessageEvent;
-import com.daijux.Squadify.event.SwipeEvent;
-import com.daijux.Squadify.event.UserRegistration;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,44 +30,6 @@ public class KafkaConsumer {
         return props;
     }
 
-    public ConsumerFactory<String, UserRegistration> registrationConsumerFactory() {
-        JsonDeserializer<UserRegistration> jsonDeserializer = new JsonDeserializer<>(UserRegistration.class);
-        jsonDeserializer.setRemoveTypeHeaders(false);
-        jsonDeserializer.setUseTypeHeaders(false);
-        jsonDeserializer.addTrustedPackages("com.daijux.Squadify.event");
-        return new DefaultKafkaConsumerFactory<>(
-                getCommonProps(),
-                new StringDeserializer(),
-                jsonDeserializer
-        );
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, UserRegistration> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, UserRegistration> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(registrationConsumerFactory());
-        return factory;
-    }
-
-    public ConsumerFactory<String, SwipeEvent> swipeConsumerFactory() {
-        JsonDeserializer<SwipeEvent> jsonDeserializer = new JsonDeserializer<>(SwipeEvent.class);
-        jsonDeserializer.setRemoveTypeHeaders(false);
-        jsonDeserializer.setUseTypeHeaders(false);
-        jsonDeserializer.addTrustedPackages("com.daijux.Squadify.event");
-        return new DefaultKafkaConsumerFactory<>(
-                getCommonProps(),
-                new StringDeserializer(),
-                jsonDeserializer
-        );
-    }
-
-    @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, SwipeEvent> swipeListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, SwipeEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
-        factory.setConsumerFactory(swipeConsumerFactory());
-        return factory;
-    }
-
     public ConsumerFactory<String, MessageEvent> messageConsumerFactory() {
         JsonDeserializer<MessageEvent> jsonDeserializer = new JsonDeserializer<>(MessageEvent.class);
         jsonDeserializer.setRemoveTypeHeaders(false);
@@ -79,8 +39,7 @@ public class KafkaConsumer {
         return new DefaultKafkaConsumerFactory<>(
                 getCommonProps(),
                 new StringDeserializer(),
-                jsonDeserializer
-        );
+                jsonDeserializer);
     }
 
     @Bean

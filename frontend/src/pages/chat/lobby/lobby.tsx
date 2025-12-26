@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store/store';
 import { MessageSquare, Loader2 } from 'lucide-react';
@@ -15,7 +15,7 @@ interface ConversationResponse {
   matchDate: string;
 }
 
-const ChatLobby: React.FC = () => {
+const ChatLobby = () => {
   const userId = useSelector((s: RootState) => s.user.data?.userId);
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);

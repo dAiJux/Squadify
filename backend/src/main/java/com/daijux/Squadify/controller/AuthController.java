@@ -8,6 +8,7 @@ import com.daijux.Squadify.dto.RegistrationRequest;
 import com.daijux.Squadify.model.User;
 import com.daijux.Squadify.service.AuthService;
 import com.daijux.Squadify.util.CookieUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,7 @@ public class AuthController {
         private final CookieUtil cookieUtil;
 
         @PostMapping("/register")
-        public Mono<ResponseEntity<Map<String, String>>> register(@RequestBody RegistrationRequest request) {
+        public Mono<ResponseEntity<Map<String, String>>> register(@Valid @RequestBody RegistrationRequest request) {
                 return authService.register(request)
                                 .map(response -> ResponseEntity.status(HttpStatus.CREATED).body(response))
                                 .onErrorResume(ResponseStatusException.class,
@@ -39,7 +40,7 @@ public class AuthController {
         }
 
         @PostMapping("/login")
-        public Mono<ResponseEntity<Void>> login(@RequestBody LoginRequest request) {
+        public Mono<ResponseEntity<Void>> login(@Valid @RequestBody LoginRequest request) {
                 return authService.login(request)
                                 .map(authResponse -> ResponseEntity.ok()
                                                 .header(HttpHeaders.SET_COOKIE,
@@ -70,7 +71,7 @@ public class AuthController {
         @PostMapping("/change-password")
         public Mono<ResponseEntity<Void>> changePassword(
                         @AuthenticationPrincipal User user,
-                        @RequestBody ChangePasswordRequest request) {
+                        @Valid @RequestBody ChangePasswordRequest request) {
                 return authService.changePassword(user.getId(), request)
                                 .then(Mono.just(ResponseEntity.ok().<Void>build()))
                                 .onErrorResume(ResponseStatusException.class,
@@ -82,7 +83,7 @@ public class AuthController {
         @DeleteMapping("/delete-account")
         public Mono<ResponseEntity<Void>> deleteAccount(
                         @AuthenticationPrincipal User user,
-                        @RequestBody DeleteAccountRequest request) {
+                        @Valid @RequestBody DeleteAccountRequest request) {
 
                 return authService.deleteAccount(user.getId(), request.getPassword())
                                 .thenReturn(ResponseEntity.ok()

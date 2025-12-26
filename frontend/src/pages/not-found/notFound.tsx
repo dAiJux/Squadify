@@ -1,8 +1,7 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './notFound.css';
 
-const NotFound: React.FC = () => {
+const NotFound = () => {
   const navigate = useNavigate();
   const goHub = () => navigate('/matchmaking');
 

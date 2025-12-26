@@ -6,6 +6,7 @@ import com.daijux.Squadify.dto.ConversationResponse;
 import com.daijux.Squadify.event.MessageEvent;
 import com.daijux.Squadify.model.User;
 import com.daijux.Squadify.service.ChatService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -43,7 +44,7 @@ public class ChatController {
     @PostMapping("/{matchId}/send")
     public Mono<ResponseEntity<Void>> sendMessage(
             @PathVariable String matchId,
-            @RequestBody ChatMessageRequest request,
+            @Valid @RequestBody ChatMessageRequest request,
             @AuthenticationPrincipal User user) {
         return chatService.sendMessage(
                 matchId,

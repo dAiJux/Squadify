@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, ChangeEvent, FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../../store/store';
@@ -6,13 +6,13 @@ import { Send, ArrowLeft, Loader2, Check, CheckCheck } from 'lucide-react';
 import './conversation.css';
 
 interface ChatMessageResponse {
-  id: string;
-  matchId: string;
-  senderId: string;
-  senderUsername: string;
-  content: string;
-  timestamp: string;
-  read: boolean;
+    id: string;
+    matchId: string;
+    senderId: string;
+    senderUsername: string;
+    content: string;
+    timestamp: string;
+    read: boolean;
 }
 
 interface MessageEvent {
@@ -31,7 +31,7 @@ interface ConversationResponse {
     otherUsername: string;
 }
 
-const Conversation: React.FC = () => {
+const Conversation = () => {
     const { matchId } = useParams<{ matchId: string }>();
     const navigate = useNavigate();
     const user = useSelector((s: RootState) => s.user.data);
@@ -91,7 +91,7 @@ const Conversation: React.FC = () => {
         }
     }, [matchId, userId, conversationInfo]);
 
-    const handleTypingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleTypingChange = (e: ChangeEvent<HTMLInputElement>) => {
         setNewMessage(e.target.value);
         if (!e.target.value.trim()) {
             if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -144,8 +144,8 @@ const Conversation: React.FC = () => {
                 setMessages(prev => {
                     const cleanedPrev = prev.filter(m =>
                         !(m.id.startsWith('temp-') &&
-                          m.senderId === data.senderId &&
-                          m.content === data.content)
+                            m.senderId === data.senderId &&
+                            m.content === data.content)
                     );
 
                     if (cleanedPrev.some(m => m.id === data.id)) {
@@ -183,7 +183,7 @@ const Conversation: React.FC = () => {
         return () => eventSource.close();
     }, [userId, matchId, conversationInfo, username, markAsReadAPI]);
 
-    const handleSend = async (e: React.FormEvent) => {
+    const handleSend = async (e: FormEvent) => {
         e.preventDefault();
         if (!newMessage.trim() || !matchId || !userId || !conversationInfo) return;
         const content = newMessage.trim();

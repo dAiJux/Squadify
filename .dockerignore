@@ -1,7 +1,49 @@
+# Dependencies
 **/node_modules
 **/target
 **/dist
+
+# IDE and editor
 .git
+.gitignore
 .idea
 .vscode
+*.iml
+
+# Environment and secrets
 .env
+.env.*
+
+# Build artifacts already present
+backend/target
+frontend/node_modules
+frontend/dist
+frontend/node
+
+# Documentation
+README.md
+HELP.md
+LICENSE
+*.md
+
+# Logs and temp files
+*.log
+logs/
+tmp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test files (not needed in prod build)
+**/*.test.*
+**/*.spec.*
+**/test
+**/tests
+backend/src/test
+
+# Docker files (avoid recursive context)
+Dockerfile*
+docker-compose*
+compose.yaml

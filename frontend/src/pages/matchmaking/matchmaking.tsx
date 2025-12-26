@@ -1,7 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RootState } from '../../store/store';
 import ProfileCard from '../../components/profileCard/profileCard';
 import { Loader2, ZapOff, Heart, X as XIcon, MessageCircle, PartyPopper } from 'lucide-react';
 import './matchmaking.css';
@@ -22,9 +20,8 @@ interface SwipeResponse {
   matchId?: string;
 }
 
-const Matchmaking: React.FC = () => {
+const Matchmaking = () => {
   const navigate = useNavigate();
-  const userId = useSelector((state: RootState) => state.user.data?.userId);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,8 +222,6 @@ const Matchmaking: React.FC = () => {
             }>
               <ProfileCard
                 candidate={currentCandidate}
-                onSwipe={() => { }}
-                isSwiping={isSwiping}
               />
             </div>
           )}

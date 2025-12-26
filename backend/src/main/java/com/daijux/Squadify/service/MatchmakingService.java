@@ -2,10 +2,10 @@ package com.daijux.Squadify.service;
 
 import com.daijux.Squadify.dto.ProfileResponse;
 import com.daijux.Squadify.dto.SwipeResponse;
-import com.daijux.Squadify.event.SwipeEvent.SwipeType;
 import com.daijux.Squadify.model.Match;
 import com.daijux.Squadify.model.Profile;
 import com.daijux.Squadify.model.Swipe;
+import com.daijux.Squadify.model.Swipe.SwipeType;
 import com.daijux.Squadify.repository.MatchRepository;
 import com.daijux.Squadify.repository.ProfileRepository;
 import com.daijux.Squadify.repository.SwipeRepository;

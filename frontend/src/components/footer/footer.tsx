@@ -1,9 +1,8 @@
-import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { Github, Linkedin } from 'lucide-react';
 import './footer.css';
 
-const Footer: React.FC = () => {
+const Footer = () => {
     const location = useLocation();
     const isHome = location.pathname === '/';
     const isMatchmaking = location.pathname === '/matchmaking';

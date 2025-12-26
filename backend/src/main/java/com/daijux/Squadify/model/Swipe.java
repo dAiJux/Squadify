@@ -1,6 +1,5 @@
 package com.daijux.Squadify.model;
 
-import com.daijux.Squadify.event.SwipeEvent.SwipeType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +14,10 @@ import java.time.LocalDateTime;
 @Document(collection = "swipes")
 @CompoundIndex(def = "{'swiperId': 1, 'targetId': 1}", unique = true)
 public class Swipe {
+
+    public enum SwipeType {
+        LIKE, PASS
+    }
 
     @Id
     private String id;

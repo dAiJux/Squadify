@@ -270,6 +270,28 @@
   @apply text-red-400 bg-red-500/10;
 }
 
+/* Password modal specific */
+.modal-card-password {
+  @apply relative overflow-visible;
+}
+
+.modal-card-password .form-row label {
+  @apply text-left;
+}
+
+.modal-notice-floating {
+  @apply absolute left-1/2 -translate-x-1/2 text-sm py-2 px-4 rounded-lg whitespace-nowrap;
+  bottom: -3rem;
+}
+
+.modal-notice-floating.success {
+  @apply text-green-400 bg-green-500/20 border border-green-500/30;
+}
+
+.modal-notice-floating.error {
+  @apply text-red-400 bg-red-500/20 border border-red-500/30;
+}
+
 @keyframes modalPop {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }

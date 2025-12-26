@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, MouseEvent, FormEvent } from 'react';
 import { useDispatch } from 'react-redux';
 import { setUserData } from '../../store/user';
 import { setProfileData } from '../../store/profile';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Check, X } from 'lucide-react';
 import './auth.css';
 
 interface AuthProps {
@@ -11,18 +12,31 @@ interface AuthProps {
   initialTab?: 'login' | 'register';
 }
 
-const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) => {
+const Auth = ({ isOpen, onClose, initialTab = 'login' }: AuthProps) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(initialTab);
   const [registerUsername, setRegisterUsername] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPassword, setRegisterPassword] = useState('');
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [registerMessage, setRegisterMessage] = useState<string | null>(null);
   const [loginIdentifier, setLoginIdentifier] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [loginMessage, setLoginMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Password requirements validation
+  const hasMinLength = registerPassword.length >= 8;
+  const hasUppercase = /[A-Z]/.test(registerPassword);
+  const hasLowercase = /[a-z]/.test(registerPassword);
+  const hasNumber = /\d/.test(registerPassword);
+  const passwordsMatch = registerPassword === registerConfirmPassword && registerConfirmPassword !== '';
+  const isPasswordValid = hasMinLength && hasUppercase && hasLowercase && hasNumber && passwordsMatch;
 
   useEffect(() => {
     setActiveTab(initialTab);
@@ -32,7 +46,7 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
 
   if (!isOpen) return null;
 
-  const handleModalContentClick = (e: React.MouseEvent) => e.stopPropagation();
+  const handleModalContentClick = (e: MouseEvent) => e.stopPropagation();
 
   const attemptLogin = async (identifier: string, password: string) => {
     setLoginMessage(null);
@@ -77,8 +91,14 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
     }
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (!isPasswordValid) {
+      setRegisterMessage('Veuillez remplir toutes les conditions du mot de passe.');
+      return;
+    }
+
     setIsSubmitting(true);
     setRegisterMessage(null);
 
@@ -105,7 +125,7 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
     }
   };
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     await attemptLogin(loginIdentifier, loginPassword);
@@ -130,7 +150,24 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
               <h2 className="modal-title">Vos coéquipiers vous attendent !</h2>
               {loginMessage && <p className="text-center font-medium text-red-400">{loginMessage}</p>}
               <input type="text" placeholder="Email ou Pseudo" className="modal-input" value={loginIdentifier} onChange={e => setLoginIdentifier(e.target.value)} required />
-              <input type="password" placeholder="••••••••" className="modal-input" value={loginPassword} onChange={e => setLoginPassword(e.target.value)} required />
+              <div className="password-input-wrapper">
+                <input
+                  type={showLoginPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="modal-input"
+                  value={loginPassword}
+                  onChange={e => setLoginPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  aria-label={showLoginPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                >
+                  {showLoginPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               <button type="submit" className="modal-btn" disabled={isSubmitting}>{isSubmitting ? 'Connexion...' : 'Se connecter'}</button>
             </form>
           ) : (
@@ -139,8 +176,77 @@ const Auth: React.FC<AuthProps> = ({ isOpen, onClose, initialTab = 'login' }) =>
               {registerMessage && <p className={`text-center font-medium ${registerMessage.includes('réussie') ? 'text-green-400' : 'text-red-400'}`}>{registerMessage}</p>}
               <input type="text" placeholder="Pseudo" className="modal-input" value={registerUsername} onChange={e => setRegisterUsername(e.target.value)} required />
               <input type="email" placeholder="Email" className="modal-input" value={registerEmail} onChange={e => setRegisterEmail(e.target.value)} required />
-              <input type="password" placeholder="••••••••" className="modal-input" value={registerPassword} onChange={e => setRegisterPassword(e.target.value)} required />
-              <button type="submit" className="modal-btn" disabled={isSubmitting}>{isSubmitting ? 'Création...' : 'Créer un compte'}</button>
+              <div className="password-field-container">
+                <div className="password-input-wrapper">
+                  <input
+                    type={showRegisterPassword ? "text" : "password"}
+                    placeholder="Mot de passe"
+                    className="modal-input"
+                    value={registerPassword}
+                    onChange={e => setRegisterPassword(e.target.value)}
+                    onFocus={() => setIsPasswordFocused(true)}
+                    onBlur={() => setIsPasswordFocused(false)}
+                    required
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                    aria-label={showRegisterPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                  >
+                    {showRegisterPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {isPasswordFocused && !isPasswordValid && (
+                  <div className="password-tooltip">
+                    <div className="password-tooltip-arrow" />
+                    <div className="password-requirements">
+                      <div className={`requirement ${hasMinLength ? 'requirement-valid' : 'requirement-invalid'}`}>
+                        {hasMinLength ? <Check size={12} /> : <X size={12} />}
+                        <span>8+ caractères</span>
+                      </div>
+                      <div className={`requirement ${hasUppercase ? 'requirement-valid' : 'requirement-invalid'}`}>
+                        {hasUppercase ? <Check size={12} /> : <X size={12} />}
+                        <span>Majuscule</span>
+                      </div>
+                      <div className={`requirement ${hasLowercase ? 'requirement-valid' : 'requirement-invalid'}`}>
+                        {hasLowercase ? <Check size={12} /> : <X size={12} />}
+                        <span>Minuscule</span>
+                      </div>
+                      <div className={`requirement ${hasNumber ? 'requirement-valid' : 'requirement-invalid'}`}>
+                        {hasNumber ? <Check size={12} /> : <X size={12} />}
+                        <span>Chiffre</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="password-input-wrapper">
+                <input
+                  type={showRegisterConfirmPassword ? "text" : "password"}
+                  placeholder="Confirmer le mot de passe"
+                  className={`modal-input ${registerConfirmPassword && (passwordsMatch ? 'input-valid' : 'input-invalid')}`}
+                  value={registerConfirmPassword}
+                  onChange={e => setRegisterConfirmPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowRegisterConfirmPassword(!showRegisterConfirmPassword)}
+                  aria-label={showRegisterConfirmPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"}
+                >
+                  {showRegisterConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                {registerConfirmPassword && (
+                  <span className={`password-match-indicator ${passwordsMatch ? 'match-valid' : 'match-invalid'}`}>
+                    {passwordsMatch ? <Check size={16} /> : <X size={16} />}
+                  </span>
+                )}
+              </div>
+              <button type="submit" className="modal-btn" disabled={isSubmitting || !isPasswordValid}>
+                {isSubmitting ? 'Création...' : 'Créer un compte'}
+              </button>
             </form>
           )}
         </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './conversationItem.css';
 
@@ -47,7 +46,7 @@ const formatLastMessageTime = (isoString: string | null, matchDate: string): str
     }
 };
 
-const ConversationItem: React.FC<ConversationItemProps> = ({ conversation }) => {
+const ConversationItem = ({ conversation }: ConversationItemProps) => {
     const navigate = useNavigate();
     const hasUnread = conversation.unreadCount > 0;
     const isNewMatch = !conversation.lastMessage;
