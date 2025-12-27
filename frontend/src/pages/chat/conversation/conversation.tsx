@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback, ChangeEvent, FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../store/store';
+import { RootState } from '~/store/store';
 import { Send, ArrowLeft, Loader2, Check, CheckCheck } from 'lucide-react';
 import './conversation.css';
 

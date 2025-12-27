@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ProfileCard from '../../components/profileCard/profileCard';
+import ProfileCard from '~/components/profileCard/profileCard';
 import { Loader2, ZapOff, Heart, X as XIcon, MessageCircle, PartyPopper } from 'lucide-react';
 import './matchmaking.css';
 

@@ -1,7 +1,7 @@
 import { useState, useEffect, MouseEvent, FormEvent } from 'react';
 import { useDispatch } from 'react-redux';
-import { setUserData } from '../../store/user';
-import { setProfileData } from '../../store/profile';
+import { setUserData } from '~/store/user';
+import { setProfileData } from '~/store/profile';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Check, X } from 'lucide-react';
 import './auth.css';

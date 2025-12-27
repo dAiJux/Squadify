@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState, Dispatch, SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../store/store';
-import { setProfileData } from '../../store/profile';
-import { setUserData, clearUserData } from '../../store/user';
-import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '../../data/gameOptions';
+import { RootState } from '~/store/store';
+import { setProfileData } from '~/store/profile';
+import { setUserData, clearUserData } from '~/store/user';
+import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '~/data/gameOptions';
 import { Edit3, Trash2, LogOut, AlertTriangle } from 'lucide-react';
 import './profile.css';
 

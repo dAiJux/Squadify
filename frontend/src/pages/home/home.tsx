@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
+import { RootState } from '~/store/store';
 import { Gamepad2, Headphones, Trophy, Swords, Target, Zap, Users, Shield } from 'lucide-react';
 import './home.css';
-import Auth from '../../components/auth/auth.tsx';
+import Auth from '~/components/auth/auth';
 
 const Home = () => {
   const navigate = useNavigate();

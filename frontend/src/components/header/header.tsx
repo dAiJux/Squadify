@@ -1,7 +1,7 @@
 import { useNavigate, useLocation, matchPath } from 'react-router-dom';
 import { User, Gamepad2, MessageSquare } from 'lucide-react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
+import { RootState } from '~/store/store';
 import './header.css';
 
 const Header = () => {

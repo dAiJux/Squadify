@@ -2,9 +2,9 @@ import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { X, Gamepad2, Clock, Swords, User } from 'lucide-react';
 import './profileCard.css';
-import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '../../data/gameOptions';
+import { GAMES_LIST, SCHEDULES_LIST, PLAYSTYLES_LIST } from '~/data/gameOptions';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
+import { RootState } from '~/store/store';
 
 interface ProfileResponse {
   userId: string;

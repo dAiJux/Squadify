@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../../store/store';
+import { RootState } from '~/store/store';
 import { MessageSquare, Loader2 } from 'lucide-react';
-import ConversationItem from '../../../components/conversationItem/conversationItem';
+import ConversationItem from '~/components/conversationItem/conversationItem';
 import './lobby.css';
 
 interface ConversationResponse {
